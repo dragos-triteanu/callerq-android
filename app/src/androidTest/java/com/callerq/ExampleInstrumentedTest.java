@@ -1,4 +1,4 @@
-package com.callerq.callerq_android;
+package com.callerq;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

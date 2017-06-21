@@ -1,4 +1,4 @@
-package com.callerq.callerq_android;
+package com.callerq;
 
 import org.junit.Test;
 

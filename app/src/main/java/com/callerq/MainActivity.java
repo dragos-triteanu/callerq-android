@@ -1,4 +1,4 @@
-package com.callerq.callerq_android;
+package com.callerq;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
