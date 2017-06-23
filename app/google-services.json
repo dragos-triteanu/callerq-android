@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "143971537138",
+    "project_id": "callerq-9c1a4"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:143971537138:android:0bd7b3b69d1ff002",
+        "android_client_info": {
+          "package_name": "com.callerq"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "143971537138-oeema90jm1jgmo7e4h1hrv054g9anam4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.callerq",
+            "certificate_hash": "2da7fc9ab6f24b452521e2cda2afdd1c9cefb861"
+          }
+        },
+        {
+          "client_id": "143971537138-o38tjjvjisvic5cudi16b5h1khl4vvtu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVVrtMWIcZc7ouNYZMFyZ7cVKqci_5zNA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
