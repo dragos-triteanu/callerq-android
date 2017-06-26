@@ -21,6 +21,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.callerq.R;
 import com.callerq.fragments.HomeFragment;
 import com.callerq.fragments.RemindersFragment;
@@ -66,12 +68,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         View header = navigationView.getHeaderView(0);
 
-        ImageView userPhoto = (ImageView) header.findViewById(R.id.userPhoto);
-        TextView userDisplayName = (TextView) header.findViewById(R.id.userDisplayName);
-        TextView userEmail = (TextView) header.findViewById(R.id.userEmail);
+        ImageView userPhoto = header.findViewById(R.id.userPhoto);
+        TextView userDisplayName = header.findViewById(R.id.userDisplayName);
+        TextView userEmail = header.findViewById(R.id.userEmail);
 
-
-
+        Glide.with(this).load(account.getPhotoUrl()).apply(RequestOptions.circleCropTransform()).into(userPhoto);
+        userDisplayName.setText(account.getDisplayName());
+        userEmail.setText(account.getEmail());
 
     }
 
