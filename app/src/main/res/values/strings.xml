@@ -4,16 +4,16 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings">Settings</string>
+    <string name="double_press_close">Press the back button again to exit</string>
 
-    <string name="title_activity_start">StartActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
-    <string name="sign_in_button">Sign in</string>
+    <string name="action_settings">Settings</string>
 
     <string name="login_connection_failed">Connection failed</string>
     <string name="play_services_connection_error">Google Play Services connection failed</string>
     <string name="google_sign_in_error">Sign in with Google failed</string>
 
-    <string name="title_activity_fullscreen">FullscreenActivity</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="welcome_to_callerq">Welcome to CallerQ !</string>
+
 </resources>

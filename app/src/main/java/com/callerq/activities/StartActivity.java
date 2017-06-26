@@ -32,6 +32,7 @@ public class StartActivity extends AppCompatActivity implements GoogleApiClient.
     private View mContentView;
     private GoogleApiClient mGoogleApiClient;
     private Button signInButton;
+    private Boolean doneLoading = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +113,13 @@ public class StartActivity extends AppCompatActivity implements GoogleApiClient.
         delayedHide(100);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (doneLoading) {
+            super.onBackPressed();
+        }
+    }
+
     private void onLogin() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
@@ -141,6 +149,7 @@ public class StartActivity extends AppCompatActivity implements GoogleApiClient.
         } else {
             // Signed out, show unauthenticated UI.
             signInButton.setVisibility(View.VISIBLE);
+            doneLoading = true;
         }
     }
 

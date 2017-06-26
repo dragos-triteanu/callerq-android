@@ -1,11 +1,13 @@
 package com.callerq.activities;
 
-import android.accounts.Account;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -15,20 +17,21 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
 import com.callerq.R;
-import com.google.android.gms.auth.api.Auth;
+import com.callerq.fragments.HomeFragment;
+import com.callerq.fragments.RemindersFragment;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "MainActivity";
-    GoogleApiClient mGoogleApiClient;
+    private Boolean doubleBackToExitPressedOnce = false;
     GoogleSignInAccount account;
 
     @Override
@@ -37,8 +40,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         account = getIntent().getParcelableExtra("accountDetails");
-
-        Toast.makeText(this, "You've reached MainActivity, " + account.getDisplayName(), Toast.LENGTH_SHORT).show();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -60,6 +61,66 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        setFragment(HomeFragment.class);
+
+        View header = navigationView.getHeaderView(0);
+
+        ImageView userPhoto = (ImageView) header.findViewById(R.id.userPhoto);
+        TextView userDisplayName = (TextView) header.findViewById(R.id.userDisplayName);
+        TextView userEmail = (TextView) header.findViewById(R.id.userEmail);
+
+
+
+
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        // Create a new fragment and specify the fragment to show based on nav item clicked
+
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.nav_home:
+                setFragment(HomeFragment.class);
+                item.setChecked(true);
+                setTitle(item.getTitle());
+                break;
+            case R.id.nav_reminders:
+                setFragment(RemindersFragment.class);
+                item.setChecked(true);
+                setTitle(item.getTitle());
+                break;
+            case R.id.nav_about:
+
+                break;
+            case R.id.nav_settings:
+
+                break;
+            case R.id.nav_logout:
+                startActivity(new Intent(MainActivity.this, StartActivity.class).putExtra("requestLogout", true));
+                finish();
+                break;
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    private void setFragment(@NonNull Class fragmentClass) {
+        Fragment fragment = null;
+
+        try {
+            fragment = (Fragment) fragmentClass.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Insert the fragment by replacing any existing fragment
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.fragment_content, fragment).commit();
     }
 
     @Override
@@ -68,32 +129,22 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if (doubleBackToExitPressedOnce) {
+                super.onBackPressed();
+                return;
+            }
+
+            this.doubleBackToExitPressedOnce = true;
+            Toast.makeText(this, R.string.double_press_close, Toast.LENGTH_SHORT).show();
+
+            new Handler().postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    doubleBackToExitPressedOnce = false;
+                }
+            }, 2000);
         }
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_home) {
-            // Handle the home action
-        } else if (id == R.id.nav_placeholder) {
-
-        } else if (id == R.id.nav_about) {
-
-        } else if (id == R.id.nav_settings) {
-
-        } else if (id == R.id.nav_logout) {
-            startActivity(new Intent(MainActivity.this, StartActivity.class).putExtra("requestLogout", true));
-            finish();
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
     }
 
     @Override
