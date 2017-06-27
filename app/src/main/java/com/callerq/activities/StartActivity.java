@@ -1,18 +1,22 @@
 package com.callerq.activities;
 
-import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
+import android.view.*;
 import android.widget.Button;
 import android.widget.Toast;
+import android.annotation.SuppressLint;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.callerq.R;
+import com.callerq.helpers.PreferencesHelper;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -51,13 +55,7 @@ public class StartActivity extends AppCompatActivity implements GoogleApiClient.
             @Override
             public void onConnected(@Nullable Bundle bundle) {
                 if (getIntent().getBooleanExtra("requestLogout", false)) {
-                    Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                            new ResultCallback<Status>() {
-                                @Override
-                                public void onResult(@NonNull Status status) {
-                                    Log.e(TAG, "User sign out status: " + status);
-                                }
-                            });
+                    onLogout();
                 }
 
                 final OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
@@ -127,6 +125,16 @@ public class StartActivity extends AppCompatActivity implements GoogleApiClient.
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
+    private void onLogout() {
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(@NonNull Status status) {
+                        Log.e(TAG, "User sign out status: " + status);
+                    }
+                });
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -141,18 +149,64 @@ public class StartActivity extends AppCompatActivity implements GoogleApiClient.
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
-            // Signed in successfully, show authenticated UI.\
-            GoogleSignInAccount account = result.getSignInAccount();
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.putExtra("accountDetails", account);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            startActivity(intent);
-            finish();
+            // Signed in successfully, ask for terms agreement
+            if (PreferencesHelper.getTermsAccepted(this)) {
+                onProceed(result);
+            } else {
+                onShowTermsDialog(result);
+            }
         } else {
             // Signed out, show unauthenticated UI.
             signInButton.setVisibility(View.VISIBLE);
             doneLoading = true;
         }
+    }
+
+    private void onShowTermsDialog(final GoogleSignInResult result) {
+        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        final ViewGroup nullParent = null;
+        View view = inflater.inflate(R.layout.dialog_terms, nullParent);
+
+        alertDialog.setTitle(R.string.title_dialog_terms);
+        alertDialog.setView(view);
+
+        alertDialog.setPositiveButton(R.string.button_accept,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        PreferencesHelper.setTermsAccepted(StartActivity.this, true);
+                        onProceed(result);
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton(R.string.button_decline,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                PreferencesHelper.setTermsAccepted(StartActivity.this, false);
+                                onLogout();
+                                dialog.dismiss();
+                            }
+                        });
+
+        alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialogInterface) {
+                PreferencesHelper.setTermsAccepted(StartActivity.this, false);
+                onLogout();
+            }
+        });
+
+        alertDialog.show();
+    }
+
+    private void onProceed(GoogleSignInResult result) {
+        GoogleSignInAccount account = result.getSignInAccount();
+        Intent intent = new Intent(StartActivity.this, MainActivity.class);
+        intent.putExtra("accountDetails", account);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivity(intent);
+        finish();
     }
 
     // Runnable for hiding the status and navigation bar
@@ -172,20 +226,16 @@ public class StartActivity extends AppCompatActivity implements GoogleApiClient.
     private final Runnable mHideRunnable = new Runnable() {
         @Override
         public void run() {
-            hide();
+            // Hide UI first
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.hide();
+            }
+
+            // Schedule a runnable to remove the status and navigation bar after a delay
+            mHideHandler.postDelayed(mHidePartRunnable, UI_ANIMATION_DELAY);
         }
     };
-
-    private void hide() {
-        // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
-
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.postDelayed(mHidePartRunnable, UI_ANIMATION_DELAY);
-    }
 
     private void delayedHide(int delayMillis) {
         mHideHandler.removeCallbacks(mHideRunnable);

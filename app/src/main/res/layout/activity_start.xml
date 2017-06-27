@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#0099cc"
+    android:fitsSystemWindows="true"
     tools:context="com.callerq.activities.StartActivity">
 
     <TextView
@@ -30,6 +31,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="136dp"
         android:text="@string/common_signin_button_text_long"
+        android:textColor="@color/colorWhite"
         android:textAllCaps="false"
         android:background="@color/colorAccent"
         android:drawableStart="@mipmap/btn_google_light_normal"

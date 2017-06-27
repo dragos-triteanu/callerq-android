@@ -75,7 +75,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Glide.with(this).load(account.getPhotoUrl()).apply(RequestOptions.circleCropTransform()).into(userPhoto);
         userDisplayName.setText(account.getDisplayName());
         userEmail.setText(account.getEmail());
-
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
