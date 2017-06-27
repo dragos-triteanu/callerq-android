@@ -1,8 +1,10 @@
 package com.callerq.activities;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,6 +19,7 @@ import android.support.annotation.Nullable;
 
 import com.callerq.R;
 import com.callerq.helpers.PreferencesHelper;
+import com.callerq.utils.RequestCodes;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -35,6 +38,7 @@ public class StartActivity extends AppCompatActivity implements GoogleApiClient.
     private final Handler mHideHandler = new Handler();
     private View mContentView;
     private GoogleApiClient mGoogleApiClient;
+    private GoogleSignInResult result;
     private Button signInButton;
     private Boolean doneLoading = false;
 
@@ -66,8 +70,8 @@ public class StartActivity extends AppCompatActivity implements GoogleApiClient.
                         @Override
                         public void run() {
                             Log.d(TAG, "Got cached sign-in");
-                            GoogleSignInResult result = opr.get();
-                            handleSignInResult(result);
+                            result = opr.get();
+                            handleSignInResult();
                         }
                     }, 1000);
                 } else {
@@ -77,7 +81,8 @@ public class StartActivity extends AppCompatActivity implements GoogleApiClient.
                     opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
                         @Override
                         public void onResult(@NonNull GoogleSignInResult googleSignInResult) {
-                            handleSignInResult(googleSignInResult);
+                            result = googleSignInResult;
+                            handleSignInResult();
                         }
                     });
                 }
@@ -141,19 +146,19 @@ public class StartActivity extends AppCompatActivity implements GoogleApiClient.
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            handleSignInResult(result);
+            result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            handleSignInResult();
         }
     }
 
-    private void handleSignInResult(GoogleSignInResult result) {
+    private void handleSignInResult() {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             // Signed in successfully, ask for terms agreement
             if (PreferencesHelper.getTermsAccepted(this)) {
-                onProceed(result);
+                onProceed();
             } else {
-                onShowTermsDialog(result);
+                onShowTermsDialog();
             }
         } else {
             // Signed out, show unauthenticated UI.
@@ -162,7 +167,7 @@ public class StartActivity extends AppCompatActivity implements GoogleApiClient.
         }
     }
 
-    private void onShowTermsDialog(final GoogleSignInResult result) {
+    private void onShowTermsDialog() {
         final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 
         LayoutInflater inflater = LayoutInflater.from(this);
@@ -176,7 +181,9 @@ public class StartActivity extends AppCompatActivity implements GoogleApiClient.
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         PreferencesHelper.setTermsAccepted(StartActivity.this, true);
-                        onProceed(result);
+                        ActivityCompat.requestPermissions(StartActivity.this,
+                                new String[] { Manifest.permission.WRITE_CALENDAR, Manifest.permission.READ_CONTACTS, Manifest.permission.CALL_PHONE },
+                                RequestCodes.MY_PERMISSIONS_MULTIPLE_REQUEST);
                         dialog.dismiss();
                     }
                 })
@@ -200,7 +207,13 @@ public class StartActivity extends AppCompatActivity implements GoogleApiClient.
         alertDialog.show();
     }
 
-    private void onProceed(GoogleSignInResult result) {
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        onProceed();
+    }
+
+    private void onProceed() {
         GoogleSignInAccount account = result.getSignInAccount();
         Intent intent = new Intent(StartActivity.this, MainActivity.class);
         intent.putExtra("accountDetails", account);
