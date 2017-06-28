@@ -23,18 +23,25 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.callerq.CallerqApplication;
 import com.callerq.R;
 import com.callerq.fragments.HomeFragment;
 import com.callerq.fragments.RemindersFragment;
+import com.callerq.services.ScheduleService;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener {
+import javax.inject.Inject;
+
+public class MainActivity extends CallerqActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "MainActivity";
     private Boolean doubleBackToExitPressedOnce = false;
     GoogleSignInAccount account;
+
+    @Inject
+    ScheduleService scheduleService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,12 +94,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_home:
                 setFragment(HomeFragment.class);
                 item.setChecked(true);
-                setTitle(item.getTitle());
+                setTitle("CallerQ - " + item.getTitle());
                 break;
             case R.id.nav_reminders:
                 setFragment(RemindersFragment.class);
                 item.setChecked(true);
-                setTitle(item.getTitle());
+                setTitle("CallerQ - " + item.getTitle());
                 break;
             case R.id.nav_about:
 
@@ -123,6 +130,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Insert the fragment by replacing any existing fragment
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.fragment_content, fragment).commit();
+    }
+
+    @Override
+    void injectDependencies() {
+        CallerqApplication.APP.inject(this);
     }
 
     @Override

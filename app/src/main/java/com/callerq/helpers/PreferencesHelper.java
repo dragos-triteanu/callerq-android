@@ -15,6 +15,7 @@ public class PreferencesHelper {
 
     private static final String TAG = "PreferencesHelper";
     private static final String PREF_TERMS_ACCEPTED = "termsAccepted";
+    private static final String IGNORE_LIST_FILE = "ignoreList";
 
     private static SharedPreferences getSharedPreferences(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context);
@@ -30,5 +31,49 @@ public class PreferencesHelper {
 
     public static Boolean getTermsAccepted (Context context) {
         return getSharedPreferences(context).getBoolean(PREF_TERMS_ACCEPTED, false);
+    }
+
+    public static void ignorePhoneNumber(Context context, String phoneNumber) {
+        FileInputStream fis;
+        try {
+            fis = context.openFileInput(IGNORE_LIST_FILE);
+        } catch (FileNotFoundException e) {
+            HashSet<String> ignoreList = new HashSet<>();
+            ignoreList.add(phoneNumber);
+            ObjectOutputStream oos;
+            try {
+                oos = new ObjectOutputStream(context.openFileOutput(IGNORE_LIST_FILE, Context.MODE_PRIVATE));
+                oos.writeObject(ignoreList);
+                oos.close();
+            } catch (Exception e1) {
+                Log.e(TAG, "Cannot create ignore list file: " + e.getMessage());
+            }
+            return;
+        }
+        try {
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            @SuppressWarnings("unchecked")
+            HashSet<String> ignoreList = new HashSet<>((HashSet<String>) ois.readObject());
+            ignoreList.add(phoneNumber);
+            ObjectOutputStream oos = new ObjectOutputStream(context.openFileOutput(IGNORE_LIST_FILE, Context.MODE_PRIVATE));
+            oos.writeObject(ignoreList);
+            oos.close();
+        } catch (Exception e) {
+            Log.e(TAG, "Cannot write ignore list to file: " + e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static boolean isPhoneNumberIgnored(Context context, String phoneNumber) {
+        HashSet<String> ignoreList = new HashSet<>();
+        try {
+            FileInputStream fis = context.openFileInput(IGNORE_LIST_FILE);
+            ObjectInputStream oin = new ObjectInputStream(fis);
+            ignoreList = new HashSet<>((HashSet<String>) oin.readObject());
+            oin.close();
+        } catch (Exception e) {
+            Log.d(TAG, "Cannot read ignore list file: " + e.getMessage());
+        }
+        return ignoreList.contains(phoneNumber);
     }
 }

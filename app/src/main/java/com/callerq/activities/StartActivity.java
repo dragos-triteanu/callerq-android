@@ -17,8 +17,10 @@ import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.callerq.CallerqApplication;
 import com.callerq.R;
 import com.callerq.helpers.PreferencesHelper;
+import com.callerq.services.ScheduleService;
 import com.callerq.utils.RequestCodes;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -30,7 +32,9 @@ import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
-public class StartActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+import javax.inject.Inject;
+
+public class StartActivity extends CallerqActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "StartActivity";
     private static final int RC_SIGN_IN = 9001;
@@ -41,6 +45,9 @@ public class StartActivity extends AppCompatActivity implements GoogleApiClient.
     private GoogleSignInResult result;
     private Button signInButton;
     private Boolean doneLoading = false;
+
+    @Inject
+    ScheduleService scheduleService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +111,11 @@ public class StartActivity extends AppCompatActivity implements GoogleApiClient.
             }
         });
 
+    }
+
+    @Override
+    void injectDependencies() {
+        CallerqApplication.APP.inject(this);
     }
 
     @Override
@@ -182,7 +194,7 @@ public class StartActivity extends AppCompatActivity implements GoogleApiClient.
                     public void onClick(DialogInterface dialog, int id) {
                         PreferencesHelper.setTermsAccepted(StartActivity.this, true);
                         ActivityCompat.requestPermissions(StartActivity.this,
-                                new String[] { Manifest.permission.WRITE_CALENDAR, Manifest.permission.READ_CONTACTS, Manifest.permission.CALL_PHONE },
+                                new String[] { Manifest.permission.CALL_PHONE, Manifest.permission.WRITE_CALENDAR, Manifest.permission.READ_CONTACTS },
                                 RequestCodes.MY_PERMISSIONS_MULTIPLE_REQUEST);
                         dialog.dismiss();
                     }
