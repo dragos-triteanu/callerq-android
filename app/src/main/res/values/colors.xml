@@ -5,11 +5,10 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorPrimaryLight">#C5CAE9</color>
     <color name="colorPrimaryText">#212121</color>
-    <color name="colorSecondaryText">#757575</color>
     <color name="colorIcons">#FFFFFF</color>
     <color name="colorDivider">#BDBDBD</color>
     <color name="colorBlack">#000000</color>
     <color name="colorWhite">#FFFFFF</color>
-
-    <color name="black_overlay">#66000000</color>
+    <color name="colorGray">#616161</color>
+    <color name="materialColor">#1E88E5</color>
 </resources>

@@ -46,7 +46,11 @@
                   android:label="@string/settings_name">
         </activity>
         <activity android:name=".activities.RescheduleActivity"
-                  android:label="@string/reschedule_name">
+                  android:label="@string/reschedule_name"
+                  android:launchMode="singleInstance"
+                  android:excludeFromRecents="true"
+                  android:taskAffinity=""
+                  android:theme="@style/AppTheme.Dialog">
         </activity>
 
         <receiver
