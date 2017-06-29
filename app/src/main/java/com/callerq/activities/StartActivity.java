@@ -194,7 +194,7 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
                     public void onClick(DialogInterface dialog, int id) {
                         PreferencesHelper.setTermsAccepted(StartActivity.this, true);
                         ActivityCompat.requestPermissions(StartActivity.this,
-                                new String[] { Manifest.permission.CALL_PHONE, Manifest.permission.WRITE_CALENDAR, Manifest.permission.READ_CONTACTS },
+                                new String[]{Manifest.permission.CALL_PHONE, Manifest.permission.WRITE_CALENDAR, Manifest.permission.READ_CONTACTS},
                                 RequestCodes.MY_PERMISSIONS_MULTIPLE_REQUEST);
                         dialog.dismiss();
                     }

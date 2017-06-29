@@ -25,11 +25,11 @@ public class PreferencesHelper {
         return getSharedPreferences(context).edit();
     }
 
-    public static void setTermsAccepted (Context context, Boolean termsAgreed) {
+    public static void setTermsAccepted(Context context, Boolean termsAgreed) {
         getSharedPreferencesEditor(context).putBoolean(PREF_TERMS_ACCEPTED, termsAgreed).commit();
     }
 
-    public static Boolean getTermsAccepted (Context context) {
+    public static Boolean getTermsAccepted(Context context) {
         return getSharedPreferences(context).getBoolean(PREF_TERMS_ACCEPTED, false);
     }
 

@@ -12,13 +12,15 @@ public class ServiceModule {
 
     @Provides
     @Singleton
-    ScheduleService provideScheduleService(){
+    ScheduleService provideScheduleService() {
         return new ScheduleService();
     }
 
     @Provides
     @Singleton
-    CalendarService provideCalendarService(){ return new CalendarService();}
+    CalendarService provideCalendarService() {
+        return new CalendarService();
+    }
 
 
 }

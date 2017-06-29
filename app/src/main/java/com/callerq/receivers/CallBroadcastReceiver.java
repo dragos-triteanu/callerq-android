@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import java.util.Calendar;
-
 import com.callerq.CallerqApplication;
 import com.callerq.helpers.PreferencesHelper;
 import com.callerq.models.CallDetails;
@@ -14,6 +12,7 @@ import com.callerq.services.ScheduleService;
 import com.callerq.utils.CallConstants;
 
 import javax.inject.Inject;
+import java.util.Calendar;
 
 public class CallBroadcastReceiver extends BroadcastReceiver {
 

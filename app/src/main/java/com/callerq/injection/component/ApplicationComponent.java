@@ -15,8 +15,12 @@ import javax.inject.Singleton;
 @Component(modules = {ApplicationModule.class, ServiceModule.class})
 public interface ApplicationComponent {
     void inject(CallerqActivity callerqActivity);
+
     void inject(StartActivity startActivity);
+
     void inject(MainActivity mainActivity);
+
     void inject(CallBroadcastReceiver broadcastReceiver);
+
     void inject(NotificationActionService notificationActionService);
 }

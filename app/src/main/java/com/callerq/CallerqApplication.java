@@ -10,9 +10,12 @@ import com.google.android.gms.analytics.Tracker;
 
 public class CallerqApplication extends Application {
     private static final String TAG = "CallerqApplication: ";
-
-    private Tracker mTracker;
     public static ApplicationComponent APP;
+    private Tracker mTracker;
+
+    public static CallerqApplication get(Context context) {
+        return (CallerqApplication) context.getApplicationContext();
+    }
 
     @Override
     public void onCreate() {
@@ -37,10 +40,6 @@ public class CallerqApplication extends Application {
             mTracker = analytics.newTracker(ACCESSIBILITY_SERVICE);
         }
         return mTracker;
-    }
-
-    public static CallerqApplication get(Context context) {
-        return (CallerqApplication) context.getApplicationContext();
     }
 
     public Tracker getmTracker() {
