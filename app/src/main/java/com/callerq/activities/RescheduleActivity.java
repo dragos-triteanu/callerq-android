@@ -1,10 +1,15 @@
 package com.callerq.activities;
 
 import android.app.DatePickerDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +17,14 @@ import android.widget.*;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.callerq.R;
+import com.callerq.services.ScheduleService;
 import com.weiwangcn.betterspinner.library.BetterSpinner;
 
+import javax.inject.Inject;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class RescheduleActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
@@ -37,6 +46,10 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
     Button buttonSubmit;
 
     @Nullable
+    @BindView(R.id.buttonSubmitDisabled)
+    Button buttonSubmitDisabled;
+
+    @Nullable
     @BindView(R.id.buttonClose)
     Button buttonClose;
 
@@ -48,16 +61,26 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
     @BindView(R.id.timeInput)
     BetterSpinner timeInput;
 
+    @Inject
+    ScheduleService scheduleService;
+
     private ViewGroup mContainerView;
     private ViewGroup formView;
 
+    private String[] dateArray = {"Today", "Tomorrow", "Pick a date..."};
+    private String[] timeArray = {"Morning", "Afternoon", "Evening", "Set the time..."};
+
+
     private ArrayAdapter<String> dateArrayAdapter;
     private Calendar setCalendar;
+
+    List<View> inputFields = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reschedule);
+        setFinishOnTouchOutside(false);
         mContainerView = (ViewGroup) findViewById(R.id.rescheduleContainer);
 
         formView = (ViewGroup) LayoutInflater.from(this).inflate(
@@ -68,6 +91,12 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         setCalendar = Calendar.getInstance();
         initiateDateInput();
         initiateTimeInput();
+
+        inputFields.add(titleText);
+        inputFields.add(dateInput);
+        inputFields.add(timeInput);
+
+        validateInputs();
     }
 
     public void onSubmit(View view) {
@@ -75,16 +104,19 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
     }
 
     public void onClose(View view) {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(ScheduleService.NOTIFICATION_ID);
+
         ViewGroup canceledView = (ViewGroup) LayoutInflater.from(RescheduleActivity.this).inflate(
                 R.layout.reschedule_canceled, mContainerView, false);
         mContainerView.removeView(formView);
         mContainerView.addView(canceledView);
 
+        setFinishOnTouchOutside(true);
         ButterKnife.bind(RescheduleActivity.this);
     }
 
     private void initiateDateInput() {
-        String[] dateArray = {"Today", "Tomorrow", "Pick a date..."};
         dateArrayAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, dateArray);
 
@@ -119,7 +151,6 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
     }
 
     private void initiateTimeInput() {
-        String[] timeArray = {"Morning", "Afternoon", "Evening", "Set the time..."};
         final ArrayAdapter<String> timeArrayAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, timeArray);
 
@@ -194,4 +225,71 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
             timeInput.requestFocus();
         }
     }
+
+    private void validateInputs() {
+        for (final View inputField : inputFields) {
+            if (inputField instanceof EditText) {
+                ((EditText) inputField).addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+//                        Toast.makeText(RescheduleActivity.this, editable.toString(), Toast.LENGTH_SHORT).show();
+                        showSubmitButton();
+                        if (titleText != null && titleText.getText().toString().isEmpty()) {
+                            disableSubmitButton();
+                        }
+                        if (dateInput != null && dateInput.getText().toString().equals(dateArray[2])) {
+                            disableSubmitButton();
+                        }
+                        if (timeInput != null && timeInput.getText().toString().equals(timeArray[3])) {
+                            disableSubmitButton();
+                        }
+                    }
+                });
+//                inputField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+//                    @Override
+//                    public void onFocusChange(View view, boolean hasFocus) {
+//                        if (!hasFocus) {
+//                            if (view.toString().isEmpty()) {
+//                                ((EditText) inputField).setError("empty");
+//                            } else {
+//                                ((EditText) inputField).setError(null);
+//                            }
+//
+//                            if (((EditText) inputField).getError() == null) {
+//                                showSubmitButton();
+//                            } else {
+//                                disableSubmitButton();
+//                            }
+//                        }
+//                    }
+//                });
+            }
+        }
+    }
+
+    private void showSubmitButton() {
+        assert buttonSubmit != null;
+        buttonSubmit.setVisibility(View.VISIBLE);
+        assert buttonSubmitDisabled != null;
+        buttonSubmitDisabled.setVisibility(View.GONE);
+
+    }
+
+    private void disableSubmitButton() {
+        assert buttonSubmitDisabled != null;
+        buttonSubmitDisabled.setVisibility(View.VISIBLE);
+        assert buttonSubmit != null;
+        buttonSubmit.setVisibility(View.GONE);
+    }
+
 }

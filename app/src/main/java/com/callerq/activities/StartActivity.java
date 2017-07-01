@@ -1,22 +1,22 @@
 package com.callerq.activities;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
-import android.view.*;
-import android.widget.Button;
-import android.widget.Toast;
-import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.ActionBar;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 import com.callerq.CallerqApplication;
 import com.callerq.R;
 import com.callerq.helpers.PreferencesHelper;
@@ -168,7 +168,9 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
         if (result.isSuccess()) {
             // Signed in successfully, ask for terms agreement
             if (PreferencesHelper.getTermsAccepted(this)) {
-                onProceed();
+                ActivityCompat.requestPermissions(StartActivity.this,
+                        new String[]{Manifest.permission.CALL_PHONE},
+                        RequestCodes.MY_PERMISSIONS_MULTIPLE_REQUEST);
             } else {
                 onShowTermsDialog();
             }
@@ -194,7 +196,7 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
                     public void onClick(DialogInterface dialog, int id) {
                         PreferencesHelper.setTermsAccepted(StartActivity.this, true);
                         ActivityCompat.requestPermissions(StartActivity.this,
-                                new String[]{Manifest.permission.CALL_PHONE, Manifest.permission.WRITE_CALENDAR, Manifest.permission.READ_CONTACTS},
+                                new String[]{Manifest.permission.CALL_PHONE, Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CALENDAR},
                                 RequestCodes.MY_PERMISSIONS_MULTIPLE_REQUEST);
                         dialog.dismiss();
                     }

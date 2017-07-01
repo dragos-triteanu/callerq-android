@@ -15,7 +15,7 @@ public class ScheduleService {
 
     private static final String TAG = "ScheduleService: ";
 
-    private static final int NOTIFICATION_ID = 1;
+    public static final int NOTIFICATION_ID = 1;
 
     public ScheduleService() {
     }
@@ -39,7 +39,7 @@ public class ScheduleService {
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(ctx);
 
-        notificationBuilder.setAutoCancel(true)
+        notificationBuilder.setAutoCancel(false)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setWhen(System.currentTimeMillis())
                 .setSmallIcon(R.drawable.callerq_icon)

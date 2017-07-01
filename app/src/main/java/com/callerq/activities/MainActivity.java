@@ -89,12 +89,12 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
             case R.id.nav_home:
                 setFragment(HomeFragment.class);
                 item.setChecked(true);
-                setTitle("CallerQ - " + item.getTitle());
+                setTitle(item.getTitle());
                 break;
             case R.id.nav_reminders:
                 setFragment(RemindersFragment.class);
                 item.setChecked(true);
-                setTitle("CallerQ - " + item.getTitle());
+                setTitle(item.getTitle());
                 break;
             case R.id.nav_about:
 
