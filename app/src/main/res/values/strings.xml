@@ -20,6 +20,9 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="welcome_to_callerq">Welcome to CallerQ !</string>
 
+    <string name="calendar_event_title_call">Call</string>
+    <string name="calendar_event_title_meeting">Meeting with</string>
+
     <string name="title_dialog_terms">CallerQ - Terms of service</string>
     <string name="button_accept">I Agree</string>
     <string name="button_decline">Decline</string>

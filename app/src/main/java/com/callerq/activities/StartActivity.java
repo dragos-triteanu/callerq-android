@@ -170,7 +170,7 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
             if (PreferencesHelper.getTermsAccepted(this)) {
                 ActivityCompat.requestPermissions(StartActivity.this,
                         new String[]{Manifest.permission.CALL_PHONE},
-                        RequestCodes.MY_PERMISSIONS_MULTIPLE_REQUEST);
+                        RequestCodes.MY_PERMISSIONS_REQUEST_MAKE_PHONE_CALL);
             } else {
                 onShowTermsDialog();
             }

@@ -15,6 +15,10 @@ public class PreferencesHelper {
 
     private static final String TAG = "PreferencesHelper";
     private static final String PREF_TERMS_ACCEPTED = "termsAccepted";
+    private static final String PREFERENCES_LOGIN_TOKEN = "loginToken";
+    private static final String PREFERENCES_ANALYTICS_ENABLED = "analyticsEnabled";
+    private static final String PREFERENCES_DATABASE_RETRY_SCHEDULED = "databaseRetryScheduled";
+    private static final String PREFERENCES_DATABASE_RETRY_INTERVAL = "databaseRetryInterval";
     private static final String IGNORE_LIST_FILE = "ignoreList";
 
     private static SharedPreferences getSharedPreferences(Context context) {
@@ -31,6 +35,32 @@ public class PreferencesHelper {
 
     public static Boolean getTermsAccepted(Context context) {
         return getSharedPreferences(context).getBoolean(PREF_TERMS_ACCEPTED, false);
+    }
+
+    public static void setLoginToken(Context context, String loginToken) {
+        getSharedPreferencesEditor(context).putString(PREFERENCES_LOGIN_TOKEN, loginToken).commit();
+    }
+
+    public static String getLoginToken(Context context) {
+        return getSharedPreferences(context).getString(PREFERENCES_LOGIN_TOKEN, null);
+    }
+
+    public static boolean isRetryScheduled(Context context) {
+        return getSharedPreferences(context).getBoolean(PREFERENCES_DATABASE_RETRY_SCHEDULED, false);
+    }
+
+    public static void setRetryScheduled(Context context, boolean retryScheduled) {
+        getSharedPreferencesEditor(context).putBoolean(PREFERENCES_DATABASE_RETRY_SCHEDULED, retryScheduled).commit();
+    }
+
+    public static long getRetryInterval(Context context) {
+        return getSharedPreferences(context).getLong(PREFERENCES_DATABASE_RETRY_INTERVAL, 0);
+    }
+
+    public static void setRetryInterval(Context context, long retryInterval) {
+        SharedPreferences.Editor edit = getSharedPreferencesEditor(context);
+        edit.putLong(PREFERENCES_DATABASE_RETRY_INTERVAL, retryInterval);
+        edit.commit();
     }
 
     public static void ignorePhoneNumber(Context context, String phoneNumber) {
@@ -75,5 +105,13 @@ public class PreferencesHelper {
             Log.d(TAG, "Cannot read ignore list file: " + e.getMessage());
         }
         return ignoreList.contains(phoneNumber);
+    }
+
+    public static void setAnalyiticsEnabled(Context context, Boolean enabled) {
+        getSharedPreferencesEditor(context).putBoolean(PREFERENCES_ANALYTICS_ENABLED, enabled).commit();
+    }
+
+    public static Boolean getAnalyiticsEnabled(Context context) {
+        return getSharedPreferences(context).getBoolean(PREFERENCES_ANALYTICS_ENABLED, false);
     }
 }

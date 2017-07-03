@@ -2,6 +2,7 @@ package com.callerq;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 import com.callerq.injection.component.ApplicationComponent;
 import com.callerq.injection.component.DaggerApplicationComponent;
 import com.callerq.injection.module.ServiceModule;
