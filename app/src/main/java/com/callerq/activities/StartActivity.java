@@ -230,8 +230,11 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
     private void onProceed() {
         GoogleSignInAccount account = result.getSignInAccount();
         Intent intent = new Intent(StartActivity.this, MainActivity.class);
-        intent.putExtra("accountDetails", account);
         intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        intent.putExtra("accountDetails", account);
+        if (getIntent().getBooleanExtra("displayReminders", false)) {
+            intent.putExtra("displayReminders", true);
+        }
         startActivity(intent);
         finish();
     }

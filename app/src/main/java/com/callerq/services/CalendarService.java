@@ -13,7 +13,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import com.callerq.models.CallDetails;
-import com.callerq.utils.RequestCodes;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -38,6 +37,7 @@ public class CalendarService extends AppCompatActivity {
                     calIds[i] = cursor.getInt(0);
                     calNames[i] = cursor.getString(1);
                     cursor.moveToNext();
+
                 }
             }
             cursor.close();
@@ -57,10 +57,14 @@ public class CalendarService extends AppCompatActivity {
             values.put(CalendarContract.Events.CALENDAR_ID, calIds[0]);
             values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().getID());
 
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.WRITE_CALENDAR},
-                        RequestCodes.MY_PERMISSIONS_REQUEST_WRITE_CALENDAR);
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
                 return;
             }
             Uri insertedEvent = contentResolver.insert(CalendarContract.Events.CONTENT_URI, values);
@@ -85,9 +89,13 @@ public class CalendarService extends AppCompatActivity {
             values.put(CalendarContract.Reminders.EVENT_ID, eventID);
             values.put(CalendarContract.Reminders.METHOD, CalendarContract.Reminders.METHOD_ALERT);
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.WRITE_CALENDAR},
-                        RequestCodes.MY_PERMISSIONS_REQUEST_WRITE_CALENDAR);
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
                 return;
             }
             Uri uri = cr.insert(CalendarContract.Reminders.CONTENT_URI, values);

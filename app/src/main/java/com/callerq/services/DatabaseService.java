@@ -1,12 +1,5 @@
 package com.callerq.services;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.callerq.helpers.SQLiteHelper;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.PendingIntent;
@@ -15,10 +8,16 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
-
+import com.callerq.helpers.PreferencesHelper;
+import com.callerq.helpers.SQLiteHelper;
 import com.callerq.models.Reminder;
 import com.callerq.utils.NetworkUtilities;
-import com.callerq.helpers.PreferencesHelper;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class DatabaseService extends IntentService {
 
@@ -107,20 +106,20 @@ public class DatabaseService extends IntentService {
     private void updateReminder(Reminder reminder) {
         openWritableDatabase();
         database.update("Reminder", reminder.toContentValues(),
-                String.format("_id = '%d'", reminder.getId()), null);
+                String.format(Locale.ENGLISH, "_id = '%d'", reminder.getId()), null);
         closeDatabase();
     }
 
     private void deleteReminder(Reminder reminder) {
         openWritableDatabase();
         database.delete("Reminder",
-                String.format("_id = '%d'", reminder.getId()), null);
+                String.format(Locale.ENGLISH, "_id = '%d'", reminder.getId()), null);
         closeDatabase();
     }
 
     private List<Reminder> getRemindersToUpload() {
         openReadableDatabase();
-        List<Reminder> remindersToUpload = new ArrayList<Reminder>();
+        List<Reminder> remindersToUpload = new ArrayList<>();
 
         Cursor results = database.query(SQLiteHelper.REMINDER_TABLE_NAME, null, "uploaded = 0", null,
                 null, null, null);
@@ -147,7 +146,7 @@ public class DatabaseService extends IntentService {
         reminder.setContactName(cursor.getString(cursor.getColumnIndex(SQLiteHelper.REMINDER_CONTACT_NAME)));
         reminder.setContactCompany(cursor.getString(cursor.getColumnIndex(SQLiteHelper.REMINDER_CONTACT_COMPANY)));
         reminder.setContactEmail(cursor.getString(cursor.getColumnIndex(SQLiteHelper.REMINDER_CONTACT_EMAIL)));
-        ArrayList<String> contactPhones = new ArrayList<String>();
+        ArrayList<String> contactPhones = new ArrayList<>();
         contactPhones.add(cursor.getString(cursor.getColumnIndex(SQLiteHelper.REMINDER_CONTACT_PHONE_1)));
         contactPhones.add(cursor.getString(cursor.getColumnIndex(SQLiteHelper.REMINDER_CONTACT_PHONE_2)));
         contactPhones.add(cursor.getString(cursor.getColumnIndex(SQLiteHelper.REMINDER_CONTACT_PHONE_3)));
@@ -161,7 +160,7 @@ public class DatabaseService extends IntentService {
         List<Reminder> remindersToUpload = getRemindersToUpload();
 
         // if there are reminders in the database that need to be uploaded
-        if (remindersToUpload.isEmpty() == false) {
+        if (!remindersToUpload.isEmpty()) {
 
             boolean shouldRetry = false;
 

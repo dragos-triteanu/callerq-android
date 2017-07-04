@@ -38,6 +38,7 @@ public class NotificationActionService extends IntentService {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if ("snooze".equals(action)) {
             calendarService.addEvent(this, callDetails);
+            // TODO: add reminder using alarm manager
             notificationManager.cancel(intExtra);
         }
 

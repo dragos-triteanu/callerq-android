@@ -1,7 +1,5 @@
 package com.callerq.activities;
 
-import java.util.Stack;
-
 import android.Manifest;
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -17,23 +15,24 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-
+import com.callerq.CallerqApplication;
 import com.callerq.R;
 import com.callerq.models.Reminder;
-import com.callerq.utils.AnalyticsActivity;
 import com.callerq.utils.RequestCodes;
 
-public class ReminderActivity extends AnalyticsActivity {
+import java.util.Stack;
+
+public class ReminderActivity extends CallerqActivity {
 
 	public static final String TAG = "ReminderActivity:";
 
 	// constants
-	public static final String REMINDER = "com.callerq.ReminderActivity.Reminder";
+    public static final String REMINDER = "reminderDetails";
 
 	private static final long SNOOZE_INTERVAL_MILLIS = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
 
 	// reminder data
-	private Reminder reminder;
+    Reminder reminder;
 
 	// form fields
 	private EditText nameField;
@@ -46,30 +45,36 @@ public class ReminderActivity extends AnalyticsActivity {
 	// private boolean callInitiated;
 
 	// will hold the reminders that pop-up while a pop-up is already displayed
-	private Stack<Intent> intentStack = new Stack<Intent>();
+    private Stack<Intent> intentStack = new Stack<>();
 
 	// Sets an ID for the notification
 	private int mNotificationId = 1;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_reminder);
 
-		nameField = (EditText) findViewById(R.id.nameField);
-		memoField = (EditText) findViewById(R.id.memoField);
-		companyField = (EditText) findViewById(R.id.companyField);
+        reminder = (Reminder) getIntent().getSerializableExtra(REMINDER);
 
-		handleIntent();
-		showNotification();
-	}
+        nameField = (EditText) findViewById(R.id.nameField);
+        memoField = (EditText) findViewById(R.id.memoField);
+        companyField = (EditText) findViewById(R.id.companyField);
+
+        handleIntent();
+        showNotification();
+    }
+
+    @Override
+    void injectDependencies() {
+        CallerqApplication.APP.inject(this);
+    }
 
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 
-		if (intent.equals(getIntent()) == false) {
+		if (!intent.equals(getIntent())) {
 			// push the old intent on the stack
 			intentStack.push(getIntent());
 			setIntent(intent);
@@ -156,7 +161,6 @@ public class ReminderActivity extends AnalyticsActivity {
 	}
 
 	private void handleIntent() {
-		reminder = (Reminder) getIntent().getExtras().get(REMINDER);
 
 		// populate the fields
 		nameField.setText(reminder.getContactName());

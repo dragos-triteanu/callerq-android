@@ -1,23 +1,37 @@
 package com.callerq.activities;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.callerq.CallerqApplication;
@@ -34,39 +48,58 @@ import javax.inject.Inject;
 public class MainActivity extends CallerqActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "MainActivity";
+    private static final int PICK_CONTACT = 0;
+
     GoogleSignInAccount account;
+
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
+    @BindView(R.id.fab)
+    FloatingActionButton fab;
+
+    @BindView(R.id.drawer_layout)
+    DrawerLayout drawer;
+
+    @BindView(R.id.nav_view)
+    NavigationView navigationView;
+
     @Inject
     ScheduleService scheduleService;
+
     private Boolean doubleBackToExitPressedOnce = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
         account = getIntent().getParcelableExtra("accountDetails");
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, RescheduleActivity.class));
+                Intent contactsIntent = new Intent();
+                contactsIntent.setAction(Intent.ACTION_PICK);
+                contactsIntent.setData(ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+
+                try {
+                    startActivityForResult(contactsIntent, PICK_CONTACT);
+                } catch (ActivityNotFoundException e) {
+                    Log.e(getClass().getSimpleName(), e.getLocalizedMessage());
+                }
             }
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-        setFragment(HomeFragment.class);
 
         View header = navigationView.getHeaderView(0);
 
@@ -77,6 +110,18 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
         Glide.with(this).load(account.getPhotoUrl()).apply(RequestOptions.circleCropTransform()).into(userPhoto);
         userDisplayName.setText(account.getDisplayName());
         userEmail.setText(account.getEmail());
+
+        Menu navMenu = navigationView.getMenu();
+
+        MenuItem homeItem = navMenu.findItem(R.id.nav_home);
+        MenuItem remindersItem = navMenu.findItem(R.id.nav_reminders);
+
+        if (!getIntent().getBooleanExtra("displayReminders", false)) {
+            setFragment(HomeFragment.class, homeItem);
+        } else {
+            setFragment(RemindersFragment.class, remindersItem);
+        }
+
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -87,14 +132,10 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
         int id = item.getItemId();
         switch (id) {
             case R.id.nav_home:
-                setFragment(HomeFragment.class);
-                item.setChecked(true);
-                setTitle(item.getTitle());
+                setFragment(HomeFragment.class, item);
                 break;
             case R.id.nav_reminders:
-                setFragment(RemindersFragment.class);
-                item.setChecked(true);
-                setTitle(item.getTitle());
+                setFragment(RemindersFragment.class, item);
                 break;
             case R.id.nav_about:
 
@@ -113,7 +154,7 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
         return true;
     }
 
-    private void setFragment(@NonNull Class fragmentClass) {
+    private void setFragment(@NonNull Class fragmentClass, @NonNull MenuItem item) {
         Fragment fragment = null;
 
         try {
@@ -125,11 +166,67 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
         // Insert the fragment by replacing any existing fragment
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.fragment_content, fragment).commit();
+
+        item.setChecked(true);
+        setTitle(item.getTitle());
     }
 
     @Override
     void injectDependencies() {
         CallerqApplication.APP.inject(this);
+    }
+
+    @Override
+    public void onActivityResult(int reqCode, int resultCode, Intent data) {
+        super.onActivityResult(reqCode, resultCode, data);
+
+        switch (reqCode) {
+            case (PICK_CONTACT):
+                if (resultCode == Activity.RESULT_OK) {
+
+                    final Uri phoneNumberUri = data.getData();
+                    getSupportLoaderManager().initLoader(0, null, new LoaderManager.LoaderCallbacks<Cursor>() {
+
+                        @Override
+                        public Loader<Cursor> onCreateLoader(int loaderId, Bundle extras) {
+                            return new CursorLoader(MainActivity.this, phoneNumberUri, null, null,
+                                    null, null);
+                        }
+
+                        @Override
+                        public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+                            if (cursor.moveToFirst()) {
+                                String phoneNumber = cursor.getString(cursor
+                                        .getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+
+                                // perform the call
+                                Intent callIntent = new Intent(Intent.ACTION_CALL);
+                                callIntent.setData(Uri.fromParts("tel", phoneNumber, null));
+                                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                                    // TODO: Consider calling
+                                    //    ActivityCompat#requestPermissions
+                                    // here to request the missing permissions, and then overriding
+                                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                    //                                          int[] grantResults)
+                                    // to handle the case where the user grants the permission. See the documentation
+                                    // for ActivityCompat#requestPermissions for more details.
+                                    return;
+                                }
+                                startActivity(callIntent);
+
+                                MainActivity.this.finish();
+                            }
+                        }
+
+                        @Override
+                        public void onLoaderReset(Loader<Cursor> loader) {
+                        }
+                    });
+
+                }
+                break;
+        }
+
     }
 
     @Override

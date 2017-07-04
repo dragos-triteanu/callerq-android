@@ -10,13 +10,13 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.PhoneNumberUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -30,6 +30,7 @@ import com.callerq.helpers.AddressBookHelper;
 import com.callerq.helpers.AddressBookHelper.AddressBookListener;
 import com.callerq.helpers.AddressBookHelper.Contact;
 import com.callerq.helpers.DatabaseHelper;
+import com.callerq.helpers.PreferencesHelper;
 import com.callerq.models.Reminder;
 import com.callerq.services.ScheduleService;
 import com.callerq.utils.CallConstants;
@@ -86,6 +87,14 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
     @BindView(R.id.quickContactBadge)
     QuickContactBadge quickContactBadge;
 
+    @Nullable
+    @BindView(R.id.savedTitle)
+    TextView savedTitle;
+
+    @Nullable
+    @BindView(R.id.savedDateAndTime)
+    TextView savedDateAndTime;
+
     @Inject
     ScheduleService scheduleService;
 
@@ -101,6 +110,8 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
     // the client's contact object
     private Contact contact;
     private String getContactRequestId;
+
+    private String eventTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,17 +134,23 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         timeInput.addTextChangedListener(new MyTextWatcher());
 
         AddressBookHelper.getInstance().addListener(this);
-
         handleIntent();
     }
 
     public void onSubmit(View view) throws Exception {
+
+        validateDateAndTime();
+
+        if (!validateTime() || !validateDate()) {
+            return;
+        }
+
         if (contact == null) {
             // perform validation
             contact = new Contact();
             contact.name = nameInput.getText().toString();
             contact.company = companyInput.getText().toString();
-            ArrayList<String> phonesList = new ArrayList<String>();
+            ArrayList<String> phonesList = new ArrayList<>();
             phonesList.add(phoneNumber);
             contact.phoneNumbers = phonesList;
             contact.email = "";
@@ -153,6 +170,11 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         reminder.setContactCompany(contact.company);
         reminder.setContactPhones(contact.phoneNumbers);
         reminder.setContactEmail(contact.email);
+
+//        Intent intent = new Intent(RescheduleActivity.this, ReminderActivity.class);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+//        intent.putExtra(ReminderActivity.REMINDER, reminder);
+//        startActivity(intent);
 
         setAlarm(reminder);
 
@@ -176,6 +198,12 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
 
         setFinishOnTouchOutside(true);
         ButterKnife.bind(RescheduleActivity.this);
+
+        assert savedTitle != null;
+        savedTitle.setText(eventTitle);
+        assert savedDateAndTime != null;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("d/M/yy hh:mm", Locale.US);
+        savedDateAndTime.setText(simpleDateFormat.format(setCalendar.getTime()));
     }
 
     public void onClose(View view) {
@@ -189,6 +217,43 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
 
         setFinishOnTouchOutside(true);
         ButterKnife.bind(RescheduleActivity.this);
+    }
+
+    public void onIgnoreNumber(View view) {
+        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+
+        alertDialog.setTitle(R.string.ignore_dialog_title);
+
+        String numberToIgnore = contact != null ? contact.name : PhoneNumberUtils.formatNumber(phoneNumber);
+
+        alertDialog.setMessage("We will not show you any more notifications for " + numberToIgnore + "\n\nAre you sure?");
+        alertDialog.setPositiveButton(R.string.ignore_dialog_positive,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        PreferencesHelper.ignorePhoneNumber(RescheduleActivity.this, phoneNumber);
+                        Toast.makeText(RescheduleActivity.this, "Number added to ignore list", Toast.LENGTH_LONG).show();
+                        dialog.dismiss();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                finish();
+                            }
+                        }, 500);
+                    }
+                })
+                .setNegativeButton(R.string.ignore_dialog_negative,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.dismiss();
+                            }
+                        });
+
+        alertDialog.show();
+    }
+
+    public void onViewReminders(View view) {
+        startActivity(new Intent(RescheduleActivity.this, StartActivity.class).putExtra("displayReminders", true));
+        finish();
     }
 
     private void handleIntent() {
@@ -236,11 +301,13 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
                 notesInput.setSelectAllOnFocus(true);
             }
         }
+
+        validateName();
     }
 
     private void setAlarm(Reminder reminder) {
 
-        Intent intent = new Intent(this, ReminderActivity.class);
+        Intent intent = new Intent(RescheduleActivity.this, ReminderActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(ReminderActivity.REMINDER, reminder);
 
@@ -259,7 +326,7 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
 
         // Get the AlarmManager service
         AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-        am.set(AlarmManager.RTC_WAKEUP, reminder.getScheduleDatetime(), sender);
+        am.set(AlarmManager.RTC_WAKEUP, reminder.getScheduleDatetime(), sender); // here
     }
 
     private Uri setCalendarEvent(Reminder reminder) throws Exception {
@@ -286,7 +353,6 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         long endMillis = endTime.getTimeInMillis();
 
         // set up the event title
-        String eventTitle;
         if (reminder.isMeeting()) {
             eventTitle = getString(R.string.calendar_event_title_meeting);
         } else {
@@ -300,7 +366,7 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         values.put(CalendarContract.Events.DTEND, endMillis);
         values.put(CalendarContract.Events.TITLE, eventTitle);
         values.put(CalendarContract.Events.DESCRIPTION, reminder.getMemoText());
-        values.put(CalendarContract.Events.CALENDAR_ID, calendarId.longValue());
+        values.put(CalendarContract.Events.CALENDAR_ID, calendarId);
         values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().getID());
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(RescheduleActivity.this,
@@ -366,14 +432,16 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int itemClicked, long l) {
                 Calendar currentTime = Calendar.getInstance();
+
+                if (itemClicked != 2) {
+                    setCalendar.set(Calendar.YEAR, currentTime.get(Calendar.YEAR));
+                    setCalendar.set(Calendar.DAY_OF_YEAR, currentTime.get(Calendar.DAY_OF_YEAR));
+                }
+
                 switch (itemClicked) {
                     case 0:
-                        setCalendar.set(Calendar.YEAR, currentTime.get(Calendar.YEAR));
-                        setCalendar.set(Calendar.DAY_OF_YEAR, currentTime.get(Calendar.DAY_OF_YEAR));
                         break;
                     case 1:
-                        setCalendar.set(Calendar.YEAR, currentTime.get(Calendar.YEAR));
-                        setCalendar.set(Calendar.DAY_OF_YEAR, Calendar.getInstance().get(Calendar.DAY_OF_YEAR));
                         setCalendar.add(Calendar.DAY_OF_YEAR, 1);
                         break;
                     case 2:
@@ -404,18 +472,21 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         timeInput.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int itemClicked, long l) {
+
+                setCalendar.set(Calendar.SECOND, 0);
+                if (itemClicked != 3) {
+                    setCalendar.set(Calendar.MINUTE, 0);
+                }
+
                 switch (itemClicked) {
                     case 0:
                         setCalendar.set(Calendar.HOUR_OF_DAY, 8);
-                        setCalendar.set(Calendar.MINUTE, 0);
                         break;
                     case 1:
                         setCalendar.set(Calendar.HOUR_OF_DAY, 14);
-                        setCalendar.set(Calendar.MINUTE, 0);
                         break;
                     case 2:
                         setCalendar.set(Calendar.HOUR_OF_DAY, 19);
-                        setCalendar.set(Calendar.MINUTE, 0);
                         break;
                     case 3:
                         TimePickerDialog timePickerDialog = new TimePickerDialog(RescheduleActivity.this, RescheduleActivity.this,

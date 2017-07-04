@@ -51,6 +51,8 @@ public class CallBroadcastReceiver extends BroadcastReceiver {
 
                     // check if the phone number is not on the ignore list
                     if (!PreferencesHelper.isPhoneNumberIgnored(context, phoneNumber)) {
+                        // TODO: retrieve contact data based on phone number
+
                         // launch the re-schedule activity
                         schedulingService.sendNotificationAfterCall(context, new CallDetails(phoneNumber, callStartedTime, callStopTime));
                     }
