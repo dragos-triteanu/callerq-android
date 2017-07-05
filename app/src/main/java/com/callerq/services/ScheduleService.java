@@ -43,7 +43,6 @@ public class ScheduleService {
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setWhen(System.currentTimeMillis())
                 .setSmallIcon(R.drawable.callerq_icon)
-                .setTicker("Hearty365")
                 .setContentTitle("Add a reminder")
                 .setContentText("For your callDetails to: " + callDetails.getPhoneNumber())
                 .setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_SOUND | Notification.FLAG_AUTO_CANCEL | Notification.FLAG_ONGOING_EVENT)

@@ -3,13 +3,15 @@ package com.callerq.models;
 import java.io.Serializable;
 import java.util.List;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.ContentValues;
 
-public class Reminder implements Serializable {
+public class Reminder implements Parcelable {
 
     private static final long serialVersionUID = 5124200187921054968L;
 
@@ -30,6 +32,29 @@ public class Reminder implements Serializable {
         id = (int) (Math.random() * 2147483647);
         uploaded = false;
     }
+
+    protected Reminder(Parcel in) {
+        String[] data = new String[3];
+
+        in.readStringArray(data);
+        // the order needs to be the same as in writeToParcel() method
+        this.contactName = data[0];
+        this.memoText = data[1];
+        this.contactCompany = data[2];
+        this.contactPhones = in.createStringArrayList();
+    }
+
+    public static final Creator<Reminder> CREATOR = new Creator<Reminder>() {
+        @Override
+        public Reminder createFromParcel(Parcel in) {
+            return new Reminder(in);
+        }
+
+        @Override
+        public Reminder[] newArray(int size) {
+            return new Reminder[size];
+        }
+    };
 
     public long getId() {
         return id;
@@ -198,6 +223,21 @@ public class Reminder implements Serializable {
             return null;
         }
 
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeStringArray(new String[] {
+                this.contactName,
+                this.memoText,
+                this.contactCompany
+        });
+        parcel.writeList(this.contactPhones);
     }
 
 }

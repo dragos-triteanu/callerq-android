@@ -12,9 +12,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 import com.callerq.CallerqApplication;
 import com.callerq.R;
 import com.callerq.models.Reminder;
@@ -22,7 +24,7 @@ import com.callerq.utils.RequestCodes;
 
 import java.util.Stack;
 
-public class ReminderActivity extends CallerqActivity {
+public class ReminderActivity extends AppCompatActivity {
 
 	public static final String TAG = "ReminderActivity:";
 
@@ -32,7 +34,7 @@ public class ReminderActivity extends CallerqActivity {
 	private static final long SNOOZE_INTERVAL_MILLIS = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
 
 	// reminder data
-    Reminder reminder;
+    private Reminder reminder;
 
 	// form fields
 	private EditText nameField;
@@ -51,11 +53,9 @@ public class ReminderActivity extends CallerqActivity {
 	private int mNotificationId = 1;
 
 	@Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_reminder);
-
-        reminder = (Reminder) getIntent().getSerializableExtra(REMINDER);
 
         nameField = (EditText) findViewById(R.id.nameField);
         memoField = (EditText) findViewById(R.id.memoField);
@@ -63,24 +63,21 @@ public class ReminderActivity extends CallerqActivity {
 
         handleIntent();
         showNotification();
-    }
 
-    @Override
-    void injectDependencies() {
-        CallerqApplication.APP.inject(this);
     }
 
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
+        setIntent(intent);
 
-		if (!intent.equals(getIntent())) {
-			// push the old intent on the stack
-			intentStack.push(getIntent());
-			setIntent(intent);
-			handleIntent();
-			showNotification();
-		}
+//		if (!intent.equals(getIntent())) {
+//			// push the old intent on the stack
+//			intentStack.push(getIntent());
+//			setIntent(intent);
+//			handleIntent();
+//			showNotification();
+//		}
 
 	}
 
@@ -162,8 +159,12 @@ public class ReminderActivity extends CallerqActivity {
 
 	private void handleIntent() {
 
+        Bundle extras = getIntent().getBundleExtra("reminderBundle");
+        reminder = extras.getParcelable(REMINDER);
+
 		// populate the fields
-		nameField.setText(reminder.getContactName());
+        assert reminder != null;
+        nameField.setText(reminder.getContactName());
 		memoField.setText(reminder.getMemoText());
 		companyField.setText(reminder.getContactCompany());
 

@@ -24,6 +24,8 @@
     <string name="calendar_event_title_meeting">Meeting with</string>
     <string name="title_activity_reminder">Call reminder</string>
 
+    <string name="server_client_id">143971537138-o38tjjvjisvic5cudi16b5h1khl4vvtu.apps.googleusercontent.com</string>
+
     <string name="title_dialog_terms">CallerQ - Terms of service</string>
     <string name="button_accept">I Agree</string>
     <string name="button_decline">Decline</string>

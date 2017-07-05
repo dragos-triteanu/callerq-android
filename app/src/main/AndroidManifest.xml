@@ -69,7 +69,7 @@
             android:label="@string/title_activity_reminder"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
-            android:taskAffinity="com.callerq.activities.ReminderActivity"
+            android:taskAffinity=".activities.ReminderActivity"
             android:theme="@style/AppTheme.Dialog">
         </activity>
 

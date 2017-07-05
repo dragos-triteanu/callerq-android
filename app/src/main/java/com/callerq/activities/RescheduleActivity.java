@@ -171,11 +171,6 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         reminder.setContactPhones(contact.phoneNumbers);
         reminder.setContactEmail(contact.email);
 
-//        Intent intent = new Intent(RescheduleActivity.this, ReminderActivity.class);
-//        intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-//        intent.putExtra(ReminderActivity.REMINDER, reminder);
-//        startActivity(intent);
-
         setAlarm(reminder);
 
         setCalendarEvent(reminder);
@@ -308,8 +303,12 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
     private void setAlarm(Reminder reminder) {
 
         Intent intent = new Intent(RescheduleActivity.this, ReminderActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(ReminderActivity.REMINDER, reminder);
+
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(ReminderActivity.REMINDER, reminder);
+
+        intent.putExtra("reminderBundle", bundle);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         // get the main contact phone
         List<String> contactPhones = reminder.getContactPhones();
@@ -322,11 +321,11 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         intent.setData(Uri.fromParts(REMINDER_URI_SCHEME, mainPhoneNumber, ""));
 
         PendingIntent sender = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_CANCEL_CURRENT);
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_UPDATE_CURRENT);
 
         // Get the AlarmManager service
         AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-        am.set(AlarmManager.RTC_WAKEUP, reminder.getScheduleDatetime(), sender); // here
+        am.set(AlarmManager.RTC_WAKEUP, reminder.getScheduleDatetime(), sender);
     }
 
     private Uri setCalendarEvent(Reminder reminder) throws Exception {

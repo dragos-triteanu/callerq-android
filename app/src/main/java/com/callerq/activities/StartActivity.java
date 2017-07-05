@@ -3,8 +3,10 @@ package com.callerq.activities;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -21,18 +23,27 @@ import com.callerq.CallerqApplication;
 import com.callerq.R;
 import com.callerq.helpers.PreferencesHelper;
 import com.callerq.services.ScheduleService;
+import com.callerq.utils.NetworkUtilities;
 import com.callerq.utils.RequestCodes;
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;
+import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.inject.Inject;
+import java.io.IOException;
 
 public class StartActivity extends CallerqActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -55,7 +66,8 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
         setContentView(R.layout.activity_start);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestProfile()
+                .requestIdToken(getString(R.string.server_client_id))
+                .requestEmail()
                 .build();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, this)
@@ -229,6 +241,11 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
 
     private void onProceed() {
         GoogleSignInAccount account = result.getSignInAccount();
+
+        String token = account.getIdToken();
+
+        onRegister(token);
+
         Intent intent = new Intent(StartActivity.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         intent.putExtra("accountDetails", account);
@@ -237,6 +254,35 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
         }
         startActivity(intent);
         finish();
+    }
+
+    private boolean onRegister(String token) {
+
+        String jsonResult = NetworkUtilities.register(token);
+
+        if (jsonResult == null) {
+            return false;
+        }
+
+        try {
+            JSONObject result = new JSONObject(jsonResult);
+
+            boolean success = result.getBoolean("success");
+            //TODO REMOVE
+//                success = true;
+            if (success) {
+
+                PreferencesHelper.setLoginToken(this, token);
+
+                return true;
+            } else {
+                Log.d(TAG, "Failed to register, reason: " + result.getString("reason"));
+                return false;
+            }
+        } catch (JSONException e) {
+            Log.e(TAG, "Error parsing register response", e);
+        }
+        return false;
     }
 
     // Runnable for hiding the status and navigation bar
