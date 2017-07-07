@@ -54,6 +54,7 @@
         </activity>
         <activity
             android:name=".activities.RescheduleActivity"
+            android:allowTaskReparenting="true"
             android:excludeFromRecents="true"
             android:label="@string/reschedule_name"
             android:launchMode="singleInstance"
@@ -93,6 +94,10 @@
         </service>
         <service
             android:name=".services.ReminderService"
+            android:exported="false">
+        </service>
+        <service
+            android:name=".services.ScheduleService"
             android:exported="false">
         </service>
     </application>

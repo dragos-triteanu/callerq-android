@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import com.callerq.CallerqApplication;
+import com.callerq.helpers.AddressBookHelper;
+import com.callerq.helpers.AddressBookHelper.AddressBookListener;
+import com.callerq.helpers.AddressBookHelper.Contact;
 import com.callerq.helpers.PreferencesHelper;
 import com.callerq.models.CallDetails;
 import com.callerq.services.ScheduleService;
@@ -14,14 +17,18 @@ import com.callerq.utils.CallConstants;
 import javax.inject.Inject;
 import java.util.Calendar;
 
-public class CallBroadcastReceiver extends BroadcastReceiver {
+public class CallBroadcastReceiver extends BroadcastReceiver implements AddressBookListener {
 
     private static final String TAG = "CallBroadcastReceiver";
 
     private static String previousCallState;
+    private static String contactName;
     private static String phoneNumber;
     private static Calendar callStartedTime;
     private static Calendar callStopTime;
+    private static String getContactRequestId;
+
+    private Context context;
 
     @Inject
     ScheduleService schedulingService;
@@ -30,6 +37,10 @@ public class CallBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
 
         CallerqApplication.APP.inject(this);
+
+        this.context = context;
+
+        AddressBookHelper.getInstance().addListener(this);
 
         String intentAction = intent.getAction();
 
@@ -52,9 +63,8 @@ public class CallBroadcastReceiver extends BroadcastReceiver {
                     // check if the phone number is not on the ignore list
                     if (!PreferencesHelper.isPhoneNumberIgnored(context, phoneNumber)) {
                         // TODO: retrieve contact data based on phone number
-
-                        // launch the re-schedule activity
-                        schedulingService.sendNotificationAfterCall(context, new CallDetails(phoneNumber, callStartedTime, callStopTime));
+                        AddressBookHelper addressBookHelper = AddressBookHelper.getInstance();
+                        getContactRequestId = addressBookHelper.getContact(context, phoneNumber);
                     }
                 }
             }
@@ -68,5 +78,19 @@ public class CallBroadcastReceiver extends BroadcastReceiver {
             previousCallState = phoneState;
         }
 
+    }
+
+    @Override
+    public void contactRetrieved(String requestId, Contact contact) {
+        if (getContactRequestId.equals(requestId)) {
+            if (contact != null) {
+                contactName = contact.name;
+            } else {
+                contactName = "";
+            }
+        }
+
+        // launch the re-schedule activity
+        schedulingService.sendNotificationAfterCall(context, new CallDetails(contactName, phoneNumber, callStartedTime, callStopTime));
     }
 }

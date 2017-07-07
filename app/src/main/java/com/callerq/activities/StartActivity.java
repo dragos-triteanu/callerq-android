@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -180,9 +181,13 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
         if (result.isSuccess()) {
             // Signed in successfully, ask for terms agreement
             if (PreferencesHelper.getTermsAccepted(this)) {
-                ActivityCompat.requestPermissions(StartActivity.this,
-                        new String[]{Manifest.permission.CALL_PHONE},
-                        RequestCodes.MY_PERMISSIONS_REQUEST_MAKE_PHONE_CALL);
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(StartActivity.this,
+                            new String[]{Manifest.permission.CALL_PHONE},
+                            RequestCodes.MY_PERMISSIONS_REQUEST_MAKE_PHONE_CALL);
+                } else {
+                    onProceed();
+                }
             } else {
                 onShowTermsDialog();
             }
@@ -236,15 +241,27 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        onProceed();
+        switch (requestCode) {
+            case RequestCodes.MY_PERMISSIONS_REQUEST_MAKE_PHONE_CALL:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    onProceed();
+                } else {
+                    finish();
+                }
+                break;
+            default:
+                onProceed();
+                break;
+        }
     }
 
     private void onProceed() {
         GoogleSignInAccount account = result.getSignInAccount();
 
+        assert account != null;
         String token = account.getIdToken();
 
-        onRegister(token);
+        // onRegister(token);
 
         Intent intent = new Intent(StartActivity.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);

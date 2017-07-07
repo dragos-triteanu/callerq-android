@@ -9,10 +9,13 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.CalendarContract;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import com.callerq.activities.MainActivity;
 import com.callerq.models.CallDetails;
+import com.callerq.utils.RequestCodes;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -22,7 +25,14 @@ public class CalendarService extends AppCompatActivity {
     public static final String TAG = "CalendarService: ";
     public static final String CONTENT_COM_ANDROID_CALENDAR_CALENDARS = "content://com.android.calendar/calendars";
 
+    private Context context;
+    private CallDetails callDetails;
+
     public void addEvent(Context context, CallDetails callDetails) {
+
+        this.context = context;
+        this.callDetails = callDetails;
+
         Cursor cursor;
         int calIds[] = new int[0];
         String[] projection = new String[]{CalendarContract.Calendars._ID, CalendarContract.Calendars.ACCOUNT_NAME};
@@ -58,13 +68,9 @@ public class CalendarService extends AppCompatActivity {
             values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().getID());
 
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
+                ActivityCompat.requestPermissions(CalendarService.this,
+                        new String[]{Manifest.permission.WRITE_CALENDAR},
+                        RequestCodes.MY_PERMISSIONS_REQUEST_WRITE_CALENDAR);
                 return;
             }
             Uri insertedEvent = contentResolver.insert(CalendarContract.Events.CONTENT_URI, values);
@@ -89,13 +95,9 @@ public class CalendarService extends AppCompatActivity {
             values.put(CalendarContract.Reminders.EVENT_ID, eventID);
             values.put(CalendarContract.Reminders.METHOD, CalendarContract.Reminders.METHOD_ALERT);
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
+                ActivityCompat.requestPermissions(CalendarService.this,
+                        new String[]{Manifest.permission.WRITE_CALENDAR},
+                        RequestCodes.MY_PERMISSIONS_REQUEST_WRITE_CALENDAR);
                 return;
             }
             Uri uri = cr.insert(CalendarContract.Reminders.CONTENT_URI, values);
@@ -108,6 +110,17 @@ public class CalendarService extends AppCompatActivity {
             c.close();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case RequestCodes.MY_PERMISSIONS_REQUEST_WRITE_CALENDAR:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    addEvent(context, callDetails);
+                }
+                break;
         }
     }
 

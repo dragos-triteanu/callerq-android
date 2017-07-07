@@ -39,6 +39,7 @@ import com.callerq.R;
 import com.callerq.fragments.HomeFragment;
 import com.callerq.fragments.RemindersFragment;
 import com.callerq.services.ScheduleService;
+import com.callerq.utils.RequestCodes;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -48,7 +49,10 @@ import javax.inject.Inject;
 public class MainActivity extends CallerqActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "MainActivity";
+    public static boolean isRunning = false;
     private static final int PICK_CONTACT = 0;
+    public static boolean displayReminders = false;
+    private Intent callIntent;
 
     GoogleSignInAccount account;
 
@@ -82,6 +86,13 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[]{Manifest.permission.READ_CONTACTS},
+                            RequestCodes.MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+                    return;
+                }
+
                 Intent contactsIntent = new Intent();
                 contactsIntent.setAction(Intent.ACTION_PICK);
                 contactsIntent.setData(ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
@@ -116,12 +127,11 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
         MenuItem homeItem = navMenu.findItem(R.id.nav_home);
         MenuItem remindersItem = navMenu.findItem(R.id.nav_reminders);
 
-        if (!getIntent().getBooleanExtra("displayReminders", false)) {
-            setFragment(HomeFragment.class, homeItem);
-        } else {
+        if (getIntent().getBooleanExtra("displayReminders", false)) {
             setFragment(RemindersFragment.class, remindersItem);
+        } else {
+            setFragment(HomeFragment.class, homeItem);
         }
-
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -154,6 +164,36 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
         return true;
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isRunning = true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Menu navMenu = navigationView.getMenu();
+        MenuItem remindersItem = navMenu.findItem(R.id.nav_reminders);
+
+        if (displayReminders) {
+            setFragment(RemindersFragment.class, remindersItem);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        displayReminders = false;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isRunning = false;
+    }
+
     private void setFragment(@NonNull Class fragmentClass, @NonNull MenuItem item) {
         Fragment fragment = null;
 
@@ -174,6 +214,23 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
     @Override
     void injectDependencies() {
         CallerqApplication.APP.inject(this);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case RequestCodes.MY_PERMISSIONS_REQUEST_MAKE_PHONE_CALL:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startActivity(callIntent);
+                    finish();
+                }
+                break;
+            case RequestCodes.MY_PERMISSIONS_REQUEST_READ_CONTACTS:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    fab.callOnClick();
+                }
+                break;
+        }
     }
 
     @Override
@@ -200,21 +257,17 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
                                         .getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
 
                                 // perform the call
-                                Intent callIntent = new Intent(Intent.ACTION_CALL);
+                                callIntent = new Intent(Intent.ACTION_CALL);
                                 callIntent.setData(Uri.fromParts("tel", phoneNumber, null));
                                 if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                                    // TODO: Consider calling
-                                    //    ActivityCompat#requestPermissions
-                                    // here to request the missing permissions, and then overriding
-                                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                    //                                          int[] grantResults)
-                                    // to handle the case where the user grants the permission. See the documentation
-                                    // for ActivityCompat#requestPermissions for more details.
+                                    ActivityCompat.requestPermissions(MainActivity.this,
+                                            new String[]{Manifest.permission.CALL_PHONE},
+                                            RequestCodes.MY_PERMISSIONS_REQUEST_MAKE_PHONE_CALL);
                                     return;
                                 }
-                                startActivity(callIntent);
 
-                                MainActivity.this.finish();
+                                startActivity(callIntent);
+                                finish();
                             }
                         }
 

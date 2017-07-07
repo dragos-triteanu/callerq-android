@@ -69,15 +69,14 @@ public class ReminderActivity extends AppCompatActivity {
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-        setIntent(intent);
 
-//		if (!intent.equals(getIntent())) {
-//			// push the old intent on the stack
-//			intentStack.push(getIntent());
-//			setIntent(intent);
-//			handleIntent();
-//			showNotification();
-//		}
+		if (!intent.equals(getIntent())) {
+			// push the old intent on the stack
+			intentStack.push(getIntent());
+			setIntent(intent);
+			handleIntent();
+			showNotification();
+		}
 
 	}
 

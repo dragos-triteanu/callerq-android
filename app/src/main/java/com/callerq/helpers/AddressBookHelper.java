@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import android.Manifest;
 import android.content.ContentProviderOperation;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -17,7 +19,10 @@ import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.RawContacts;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import com.callerq.activities.RescheduleActivity;
+import com.callerq.utils.RequestCodes;
 
 public class AddressBookHelper {
 
@@ -64,7 +69,7 @@ public class AddressBookHelper {
         new AddContactTask(context).execute(contact);
     }
 
-    public String getContact(Context context, String phoneNumber) {;
+    public String getContact(Context context, String phoneNumber) {
         String requestId = UUID.randomUUID().toString();
         new GetContactTask(context, requestId).execute(phoneNumber);
         return requestId;
@@ -142,6 +147,7 @@ public class AddressBookHelper {
             // get the contact's display name
             Uri uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
                     Uri.encode(phoneNumber));
+
             Cursor people = context.getContentResolver().query(uri,
                     new String[] { PhoneLookup._ID, PhoneLookup.DISPLAY_NAME },
                     null, null, null);

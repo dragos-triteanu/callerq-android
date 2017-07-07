@@ -39,7 +39,7 @@ public class ReminderService extends IntentService {
         notificationBuilder.setAutoCancel(false)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setWhen(System.currentTimeMillis())
-                .setSmallIcon(R.drawable.callerq_icon)
+                .setSmallIcon(R.mipmap.ic_logo)
                 .setContentTitle("Call " + reminder.getContactName())
                 .setContentText(reminder.getMemoText().isEmpty() ? "No additional notes" : reminder.getMemoText())
                 .setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_SOUND | Notification.FLAG_AUTO_CANCEL | Notification.FLAG_ONGOING_EVENT);

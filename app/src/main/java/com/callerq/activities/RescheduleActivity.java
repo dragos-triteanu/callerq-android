@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -31,6 +32,7 @@ import com.callerq.helpers.AddressBookHelper.AddressBookListener;
 import com.callerq.helpers.AddressBookHelper.Contact;
 import com.callerq.helpers.DatabaseHelper;
 import com.callerq.helpers.PreferencesHelper;
+import com.callerq.models.CallDetails;
 import com.callerq.models.Reminder;
 import com.callerq.services.ScheduleService;
 import com.callerq.utils.CallConstants;
@@ -133,15 +135,21 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         dateInput.addTextChangedListener(new MyTextWatcher());
         timeInput.addTextChangedListener(new MyTextWatcher());
 
-        AddressBookHelper.getInstance().addListener(this);
-        handleIntent();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(RescheduleActivity.this,
+                    new String[]{Manifest.permission.READ_CONTACTS},
+                    RequestCodes.MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+        } else {
+            AddressBookHelper.getInstance().addListener(this);
+            handleIntent();
+        }
     }
 
-    public void onSubmit(View view) throws Exception {
+    public void onSubmit(View view) {
 
         validateDateAndTime();
 
-        if (!validateTime() || !validateDate()) {
+        if (!validateName() || !validateTime() || !validateDate()) {
             return;
         }
 
@@ -171,9 +179,13 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         reminder.setContactPhones(contact.phoneNumbers);
         reminder.setContactEmail(contact.email);
 
-        setAlarm(reminder);
-
         setCalendarEvent(reminder);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        setAlarm(reminder);
 
         // save the reminder to the local database and attempt upload
         DatabaseHelper.getInstance().saveReminder(this, reminder);
@@ -199,6 +211,27 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         assert savedDateAndTime != null;
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("d/M/yy hh:mm", Locale.US);
         savedDateAndTime.setText(simpleDateFormat.format(setCalendar.getTime()));
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case RequestCodes.MY_PERMISSIONS_REQUEST_READ_CONTACTS:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    AddressBookHelper.getInstance().addListener(this);
+                    handleIntent();
+                } else {
+                    finish();
+                }
+                break;
+            case RequestCodes.MY_PERMISSIONS_REQUEST_WRITE_CALENDAR:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    onSubmit(null);
+                } else {
+                    finish();
+                }
+                break;
+        }
     }
 
     public void onClose(View view) {
@@ -247,20 +280,26 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
     }
 
     public void onViewReminders(View view) {
-        startActivity(new Intent(RescheduleActivity.this, StartActivity.class).putExtra("displayReminders", true));
+        if (MainActivity.isRunning) {
+            MainActivity.displayReminders = true;
+        } else {
+            Intent intent = new Intent(this, StartActivity.class);
+            intent.putExtra("displayReminders", true);
+            startActivity(intent);
+        }
         finish();
     }
 
     private void handleIntent() {
 
         // get the phone number out of the intent
-        phoneNumber = getIntent().getStringExtra(CallConstants.INTENT_PHONE_NUMBER);
+        CallDetails callDetails = (CallDetails) getIntent().getSerializableExtra(CallConstants.CALL_DETAILS_EXTRA);
+
+        phoneNumber = callDetails.getPhoneNumber();
 
         // get the call start time and call end time
-        callStartTime = (Calendar) getIntent().getSerializableExtra(
-                CallConstants.INTENT_CALL_STARTED_TIME);
-        callStopTime = (Calendar) getIntent().getSerializableExtra(
-                CallConstants.INTENT_CALL_STOP_TIME);
+        callStartTime = callDetails.getCallStartedTime();
+        callStopTime = callDetails.getCallStopTime();
 
         // set the contact badge photo
         quickContactBadge.assignContactFromPhone(phoneNumber, true);
@@ -276,7 +315,7 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
     public void contactRetrieved(String requestId, Contact contact) {
         if (getContactRequestId.equals(requestId)) {
             this.contact = contact;
-            if (contact != null && nameInput != null && companyInput != null && notesInput != null) {
+            if (contact != null) {
                 nameInput.setText(contact.name);
                 if (!contact.company.isEmpty()) {
                     companyInput.setText(contact.company);
@@ -294,10 +333,12 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
                     notesInput.setText(oldMemo);
                 }
                 notesInput.setSelectAllOnFocus(true);
+
+                showSubmitButton();
             }
+
         }
 
-        validateName();
     }
 
     private void setAlarm(Reminder reminder) {
@@ -328,16 +369,25 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         am.set(AlarmManager.RTC_WAKEUP, reminder.getScheduleDatetime(), sender);
     }
 
-    private Uri setCalendarEvent(Reminder reminder) throws Exception {
+    private void setCalendarEvent(Reminder reminder) {
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(RescheduleActivity.this,
+                    new String[]{Manifest.permission.WRITE_CALENDAR},
+                    RequestCodes.MY_PERMISSIONS_REQUEST_WRITE_CALENDAR);
+            return;
+        }
 
         Account googleAccount = getFirstGoogleAccount();
         if (googleAccount == null) {
-            throw new Exception("There is no Google account set up on the device.");
+            Toast.makeText(this, "There is no Google account set up on the device.", Toast.LENGTH_LONG).show();
+            finish();
         }
 
         Long calendarId = getFirstCalendarId(googleAccount);
         if (calendarId == null) {
-            throw new Exception("No calendar was found on the Google account.");
+            Toast.makeText(this, "No calendar was found on the Google account.", Toast.LENGTH_LONG).show();
+            finish();
         }
 
         // calculate the start end end time
@@ -367,14 +417,9 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         values.put(CalendarContract.Events.DESCRIPTION, reminder.getMemoText());
         values.put(CalendarContract.Events.CALENDAR_ID, calendarId);
         values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().getID());
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(RescheduleActivity.this,
-                    new String[]{Manifest.permission.WRITE_CALENDAR},
-                    RequestCodes.MY_PERMISSIONS_REQUEST_WRITE_CALENDAR);
-            // TODO: onRequestPermissionsResult
-        }
 
-        return cr.insert(CalendarContract.Events.CONTENT_URI, values);
+        cr.insert(CalendarContract.Events.CONTENT_URI, values);
+
     }
 
     private Account getFirstGoogleAccount() {
@@ -399,23 +444,24 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
                 + " = ?) AND (" + CalendarContract.Calendars.OWNER_ACCOUNT + " = ?))";
         String[] selectionArgs = new String[]{account.name, account.type, account.name};
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(RescheduleActivity.this,
-                    new String[]{Manifest.permission.READ_CALENDAR},
+                    new String[]{Manifest.permission.WRITE_CALENDAR},
                     RequestCodes.MY_PERMISSIONS_REQUEST_WRITE_CALENDAR);
-            // TODO: onRequestPermissionsResult
-        }
-        cur = cr.query(uri, new String[]{CalendarContract.Calendars._ID}, selection, selectionArgs, null);
-
-        assert cur != null;
-        if (!cur.moveToFirst()) {
             return null;
+        } else {
+            cur = cr.query(uri, new String[]{CalendarContract.Calendars._ID}, selection, selectionArgs, null);
+
+            assert cur != null;
+            if (!cur.moveToFirst()) {
+                return null;
+            }
+
+            long calendarId = cur.getLong(cur.getColumnIndex(CalendarContract.Calendars._ID));
+            cur.close();
+
+            return calendarId;
         }
-
-        long calendarId = cur.getLong(cur.getColumnIndex(CalendarContract.Calendars._ID));
-        cur.close();
-
-        return calendarId;
     }
 
     private void initiateDateInput() {
@@ -637,12 +683,12 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
 
     private void showSubmitButton() {
         buttonSubmit.setVisibility(View.VISIBLE);
-        buttonSubmitDisabled.setVisibility(View.GONE);
-
+        buttonSubmitDisabled.setVisibility(View.INVISIBLE);
     }
 
     private void disableSubmitButton() {
         buttonSubmitDisabled.setVisibility(View.VISIBLE);
-        buttonSubmit.setVisibility(View.GONE);
+        buttonSubmit.setVisibility(View.INVISIBLE);
+        Toast.makeText(scheduleService, "SUBMIT BUTTON DISABLED", Toast.LENGTH_LONG).show();
     }
 }
