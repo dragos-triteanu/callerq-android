@@ -50,7 +50,7 @@ public class ScheduleService extends IntentService {
         rescheduleActivityIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         rescheduleActivityIntent.putExtra(CallConstants.CALL_DETAILS_EXTRA, callDetails);
 
-        Intent snoozeIntent = new Intent(ctx, NotificationActionService.class).setAction("snooze");
+        Intent snoozeIntent = new Intent(ctx, NotificationActionService.class).setAction("snoozeReminder");
         snoozeIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         snoozeIntent.putExtra(CallConstants.CALL_DETAILS_EXTRA, callDetails);
         snoozeIntent.putExtra(CallConstants.NOTIFICATION_ID, NOTIFICATION_ID);
@@ -72,7 +72,7 @@ public class ScheduleService extends IntentService {
                 .setContentIntent(reschedulePendingIntent)
                 .setContentInfo("Info");
 
-        notificationBuilder.addAction(new NotificationCompat.Action(0, "Snooze", cancelPendingIntent));
+        notificationBuilder.addAction(0, "Snooze", cancelPendingIntent);
         notificationBuilder.addAction(0, "Schedule", reschedulePendingIntent);
 
         NotificationManager notificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);

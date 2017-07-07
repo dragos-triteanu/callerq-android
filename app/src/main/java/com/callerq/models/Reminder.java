@@ -1,6 +1,7 @@
 package com.callerq.models;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Parcel;
@@ -34,14 +35,16 @@ public class Reminder implements Parcelable {
     }
 
     protected Reminder(Parcel in) {
-        String[] data = new String[3];
+        String[] contactDetails = new String[3];
+        List<String> contactPhones = new ArrayList<>();
 
-        in.readStringArray(data);
-        // the order needs to be the same as in writeToParcel() method
-        this.contactName = data[0];
-        this.memoText = data[1];
-        this.contactCompany = data[2];
-        this.contactPhones = in.createStringArrayList();
+        in.readStringArray(contactDetails);
+        in.readStringList(contactPhones);
+
+        this.contactName = contactDetails[0];
+        this.memoText = contactDetails[1];
+        this.contactCompany = contactDetails[2];
+        this.contactPhones = contactPhones;
     }
 
     public static final Creator<Reminder> CREATOR = new Creator<Reminder>() {
@@ -237,7 +240,7 @@ public class Reminder implements Parcelable {
                 this.memoText,
                 this.contactCompany
         });
-        parcel.writeList(this.contactPhones);
+        parcel.writeStringList(this.contactPhones);
     }
 
 }

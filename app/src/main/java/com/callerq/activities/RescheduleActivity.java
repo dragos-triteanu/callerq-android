@@ -34,6 +34,7 @@ import com.callerq.helpers.DatabaseHelper;
 import com.callerq.helpers.PreferencesHelper;
 import com.callerq.models.CallDetails;
 import com.callerq.models.Reminder;
+import com.callerq.services.ReminderService;
 import com.callerq.services.ScheduleService;
 import com.callerq.utils.CallConstants;
 import com.callerq.utils.RequestCodes;
@@ -343,13 +344,14 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
 
     private void setAlarm(Reminder reminder) {
 
-        Intent intent = new Intent(RescheduleActivity.this, ReminderActivity.class);
+        Intent intent = new Intent(RescheduleActivity.this, ReminderService.class);
 
         Bundle bundle = new Bundle();
-        bundle.putParcelable(ReminderActivity.REMINDER, reminder);
+        bundle.putParcelable(ReminderService.REMINDER, reminder);
 
         intent.putExtra("reminderBundle", bundle);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.setAction("reminderNotification");
 
         // get the main contact phone
         List<String> contactPhones = reminder.getContactPhones();
@@ -361,12 +363,16 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         // in this case, the contact's phone number
         intent.setData(Uri.fromParts(REMINDER_URI_SCHEME, mainPhoneNumber, ""));
 
-        PendingIntent sender = PendingIntent.getActivity(this, 0, intent,
+        PendingIntent sender = PendingIntent.getService(this, 0, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_UPDATE_CURRENT);
 
         // Get the AlarmManager service
+//        AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+//        am.set(AlarmManager.RTC_WAKEUP, reminder.getScheduleDatetime(), sender);
+        Calendar currentTime = Calendar.getInstance();
+        currentTime.add(Calendar.SECOND, 5);
         AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-        am.set(AlarmManager.RTC_WAKEUP, reminder.getScheduleDatetime(), sender);
+        am.set(AlarmManager.RTC_WAKEUP, currentTime.getTimeInMillis(), sender);
     }
 
     private void setCalendarEvent(Reminder reminder) {
