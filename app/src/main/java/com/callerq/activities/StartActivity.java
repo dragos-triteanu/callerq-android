@@ -3,7 +3,6 @@ package com.callerq.activities;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -28,14 +27,12 @@ import com.callerq.utils.NetworkUtilities;
 import com.callerq.utils.RequestCodes;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;
 import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
@@ -116,7 +113,7 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
 
         mContentView = findViewById(R.id.fullscreen_content);
 
-        signInButton = (Button) findViewById(R.id.sign_in_button);
+        signInButton = (Button) findViewById(R.id.signInButton);
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -259,9 +256,9 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
         GoogleSignInAccount account = result.getSignInAccount();
 
         assert account != null;
-        String token = account.getIdToken();
+        String mAccountName = account.getEmail();
 
-        // onRegister(token);
+        new RetrieveTokenTask().execute(mAccountName);
 
         Intent intent = new Intent(StartActivity.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
@@ -285,8 +282,7 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
             JSONObject result = new JSONObject(jsonResult);
 
             boolean success = result.getBoolean("success");
-            //TODO REMOVE
-//                success = true;
+
             if (success) {
 
                 PreferencesHelper.setLoginToken(this, token);
@@ -300,6 +296,32 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
             Log.e(TAG, "Error parsing register response", e);
         }
         return false;
+    }
+
+    private class RetrieveTokenTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            String accountName = params[0];
+            String scopes = "audience:server:client_id:23254426898-ss5vhi3gvfma9577tfjdjj59tsauq97l.apps.googleusercontent.com";
+            String token = null;
+            try {
+                token = GoogleAuthUtil.getToken(getApplicationContext(), accountName, scopes);
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+            } catch (UserRecoverableAuthException e) {
+                startActivityForResult(e.getIntent(), 55664);
+            } catch (GoogleAuthException e) {
+                Log.e(TAG, e.getMessage());
+            }
+            return token;
+        }
+
+        @Override
+        protected void onPostExecute(String token) {
+            super.onPostExecute(token);
+            onRegister(token);
+        }
     }
 
     // Runnable for hiding the status and navigation bar

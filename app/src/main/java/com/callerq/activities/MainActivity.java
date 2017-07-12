@@ -2,6 +2,7 @@ package com.callerq.activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -14,8 +15,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -38,6 +37,8 @@ import com.callerq.CallerqApplication;
 import com.callerq.R;
 import com.callerq.fragments.HomeFragment;
 import com.callerq.fragments.RemindersFragment;
+import com.callerq.helpers.DatabaseHelper;
+import com.callerq.models.Reminder;
 import com.callerq.services.ScheduleService;
 import com.callerq.utils.RequestCodes;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -45,8 +46,9 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 
-public class MainActivity extends CallerqActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends CallerqActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener, DatabaseHelper.DatabaseListener {
 
     private static final String TAG = "MainActivity";
     public static boolean isRunning = false;
@@ -72,6 +74,8 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
     ScheduleService scheduleService;
 
     private Boolean doubleBackToExitPressedOnce = false;
+
+    private Fragment remindersFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,10 +131,12 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
         MenuItem homeItem = navMenu.findItem(R.id.nav_home);
         MenuItem remindersItem = navMenu.findItem(R.id.nav_reminders);
 
+        remindersFragment = new RemindersFragment();
+
         if (getIntent().getBooleanExtra("displayReminders", false)) {
-            setFragment(RemindersFragment.class, remindersItem);
+            setFragment(remindersFragment, remindersItem);
         } else {
-            setFragment(HomeFragment.class, homeItem);
+            setFragment(new HomeFragment(), homeItem);
         }
     }
 
@@ -142,16 +148,16 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
         int id = item.getItemId();
         switch (id) {
             case R.id.nav_home:
-                setFragment(HomeFragment.class, item);
+                setFragment(new HomeFragment(), item);
                 break;
             case R.id.nav_reminders:
-                setFragment(RemindersFragment.class, item);
+                setFragment(remindersFragment, item);
                 break;
             case R.id.nav_about:
-
+                startActivity(new Intent(this, AboutActivity.class));
                 break;
             case R.id.nav_settings:
-
+                startActivity(new Intent(this, SettingsActivity.class));
                 break;
             case R.id.nav_logout:
                 startActivity(new Intent(MainActivity.this, StartActivity.class).putExtra("requestLogout", true));
@@ -178,7 +184,7 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
         MenuItem remindersItem = navMenu.findItem(R.id.nav_reminders);
 
         if (displayReminders) {
-            setFragment(RemindersFragment.class, remindersItem);
+            setFragment(new RemindersFragment(), remindersItem);
         }
     }
 
@@ -194,18 +200,12 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
         isRunning = false;
     }
 
-    private void setFragment(@NonNull Class fragmentClass, @NonNull MenuItem item) {
-        Fragment fragment = null;
-
-        try {
-            fragment = (Fragment) fragmentClass.newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void setFragment(@NonNull Fragment fragment, @NonNull MenuItem item) {
 
         // Insert the fragment by replacing any existing fragment
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.fragment_content, fragment).commit();
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_content, fragment).commit();
 
         item.setChecked(true);
         setTitle(item.getTitle());
@@ -310,5 +310,15 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.e(TAG, "Connection failed with error code " + connectionResult);
         Toast.makeText(this, getString(R.string.play_services_connection_error), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void savedReminder(String requestId) {
+
+    }
+
+    @Override
+    public void gotReminders(ArrayList<Reminder> reminders) {
+        // TODO: Get the reminders and display them in the fragment
     }
 }

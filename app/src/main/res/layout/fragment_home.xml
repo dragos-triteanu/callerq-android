@@ -8,7 +8,6 @@
     tools:context="com.callerq.fragments.HomeFragment">
 
     <ImageView
-        android:id="@+id/logoImage"
         android:layout_width="300dp"
         android:layout_height="128dp"
         app:srcCompat="@drawable/callerq_logo"

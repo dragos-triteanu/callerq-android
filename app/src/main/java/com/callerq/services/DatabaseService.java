@@ -15,6 +15,7 @@ import com.callerq.utils.NetworkUtilities;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -29,6 +30,8 @@ public class DatabaseService extends IntentService {
     public static final String ACTION_SAVE_REMINDER = "com.callerq.DatabaseService.saveReminder";
     public static final String ACTION_ATTEMPT_UPLOAD = "com.callerq.DatabaseService.attemptUpload";
     public static final String ACTION_SAVED_REMINDER = "com.callerq.DatabaseService.savedReminder";
+    public static final String ACTION_GET_REMINDERS = "com.callerq.DatabaseService.getReminders";
+    public static final String ACTION_GOT_REMINDERS = "com.callerq.DatabaseService.gotReminders";
 
     private SQLiteDatabase database;
 
@@ -51,11 +54,11 @@ public class DatabaseService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         String action = intent.getAction();
-        Bundle extras = intent.getExtras();
-        Log.d(TAG, "Recieved new intent to handle; action = " + action);
+        Bundle extras = intent.getBundleExtra("reminderBundle");
+        Log.d(TAG, "Received new intent to handle; action = " + action);
         if (action.equals(ACTION_SAVE_REMINDER) && extras != null
                 && !extras.isEmpty()) {
-            Reminder reminder = (Reminder) extras.get(PARAM_REMINDER);
+            Reminder reminder = (Reminder) extras.getSerializable(PARAM_REMINDER);
             saveReminder(reminder);
             Intent responseIntent = new Intent(ACTION_SAVED_REMINDER);
             responseIntent.setData(intent.getData());
@@ -73,6 +76,13 @@ public class DatabaseService extends IntentService {
             }
 
             uploadReminders();
+        } else if (action.equals(ACTION_GET_REMINDERS)) {
+            ArrayList<Reminder> reminders = getRemindersToDisplay();
+
+            Intent responseIntent = new Intent(ACTION_GOT_REMINDERS);
+            responseIntent.putParcelableArrayListExtra("remindersToDisplay", reminders);
+            responseIntent.setData(intent.getData());
+            sendBroadcast(responseIntent);
         }
     }
 
@@ -115,6 +125,22 @@ public class DatabaseService extends IntentService {
         database.delete("Reminder",
                 String.format(Locale.ENGLISH, "_id = '%d'", reminder.getId()), null);
         closeDatabase();
+    }
+
+    private ArrayList<Reminder> getRemindersToDisplay() {
+        openReadableDatabase();
+        ArrayList<Reminder> remindersToDisplay = new ArrayList<>();
+
+        Cursor results = database.query(SQLiteHelper.REMINDER_TABLE_NAME, null, null, null,
+                null, null, null);
+        results.moveToFirst();
+        while (!results.isAfterLast()) {
+            Reminder reminder = cursorToReminder(results);
+            remindersToDisplay.add(reminder);
+            results.moveToNext();
+        }
+        closeDatabase();
+        return remindersToDisplay;
     }
 
     private List<Reminder> getRemindersToUpload() {
@@ -169,7 +195,7 @@ public class DatabaseService extends IntentService {
                 try {
                     String jsonResult = NetworkUtilities
                             .postReminders(this, remindersToUpload);
-                    JSONObject result = new JSONObject(jsonResult);
+                     JSONObject result = new JSONObject(jsonResult);
 
                     boolean success = result.getBoolean("success");
                     if (success) {

@@ -121,7 +121,7 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reschedule);
         setFinishOnTouchOutside(false);
-        mContainerView = (ViewGroup) findViewById(R.id.rescheduleContainer);
+        mContainerView = (ViewGroup) findViewById(R.id.reschedule_container);
 
         formView = (ViewGroup) LayoutInflater.from(this).inflate(
                 R.layout.reschedule_form, mContainerView, false);
@@ -695,6 +695,5 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
     private void disableSubmitButton() {
         buttonSubmitDisabled.setVisibility(View.VISIBLE);
         buttonSubmit.setVisibility(View.INVISIBLE);
-        Toast.makeText(scheduleService, "SUBMIT BUTTON DISABLED", Toast.LENGTH_LONG).show();
     }
 }

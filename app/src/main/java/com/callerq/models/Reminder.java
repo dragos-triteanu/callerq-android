@@ -1,6 +1,5 @@
 package com.callerq.models;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +16,7 @@ public class Reminder implements Parcelable {
     private static final long serialVersionUID = 5124200187921054968L;
 
     private long id;
-    private int callDuration;
+    private long callDuration;
     private long callStartDatetime;
     private long createdDatetime;
     private boolean isMeeting;
@@ -34,31 +33,6 @@ public class Reminder implements Parcelable {
         uploaded = false;
     }
 
-    protected Reminder(Parcel in) {
-        String[] contactDetails = new String[3];
-        List<String> contactPhones = new ArrayList<>();
-
-        in.readStringArray(contactDetails);
-        in.readStringList(contactPhones);
-
-        this.contactName = contactDetails[0];
-        this.memoText = contactDetails[1];
-        this.contactCompany = contactDetails[2];
-        this.contactPhones = contactPhones;
-    }
-
-    public static final Creator<Reminder> CREATOR = new Creator<Reminder>() {
-        @Override
-        public Reminder createFromParcel(Parcel in) {
-            return new Reminder(in);
-        }
-
-        @Override
-        public Reminder[] newArray(int size) {
-            return new Reminder[size];
-        }
-    };
-
     public long getId() {
         return id;
     }
@@ -67,11 +41,11 @@ public class Reminder implements Parcelable {
         this.id = id;
     }
 
-    public int getCallDuration() {
+    public long getCallDuration() {
         return callDuration;
     }
 
-    public void setCallDuration(int callDuration) {
+    public void setCallDuration(long callDuration) {
         this.callDuration = callDuration;
     }
 
@@ -130,7 +104,7 @@ public class Reminder implements Parcelable {
     public void setContactCompany(String contactCompany) {
         this.contactCompany = contactCompany;
     }
-    
+
     public String getContactEmail() {
         return contactEmail;
     }
@@ -169,24 +143,22 @@ public class Reminder implements Parcelable {
         contentValues.put("contactCompany", contactCompany);
         contentValues.put("contactEmail", contactEmail);
 
-        String contactPhone1 = new String();
-        String contactPhone2 = new String();
-        String contactPhone3 = new String();
+        String contactPhone1 = "";
+        String contactPhone2 = "";
+        String contactPhone3 = "";
 
         int count = 0;
         for (String phone : contactPhones) {
             switch (count) {
-            case 0:
-                contactPhone1 = phone;
-                break;
-            case 1:
-                contactPhone2 = phone;
-                break;
-            case 2:
-                contactPhone3 = phone;
-                break;
-            default:
-                continue;
+                case 0:
+                    contactPhone1 = phone;
+                    break;
+                case 1:
+                    contactPhone2 = phone;
+                    break;
+                case 2:
+                    contactPhone3 = phone;
+                    break;
             }
         }
 
@@ -228,19 +200,54 @@ public class Reminder implements Parcelable {
 
     }
 
+
+    protected Reminder(Parcel in) {
+        id = in.readLong();
+        callDuration = in.readLong();
+        callStartDatetime = in.readLong();
+        createdDatetime = in.readLong();
+        isMeeting = in.readByte() != 0;
+        memoText = in.readString();
+        scheduleDatetime = in.readLong();
+        contactName = in.readString();
+        contactCompany = in.readString();
+        contactEmail = in.readString();
+        contactPhones = new ArrayList<>();
+        in.readList(contactPhones, String.class.getClassLoader());
+        uploaded = in.readByte() != 0;
+    }
+
     @Override
     public int describeContents() {
         return 0;
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeStringArray(new String[] {
-                this.contactName,
-                this.memoText,
-                this.contactCompany
-        });
-        parcel.writeStringList(this.contactPhones);
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(id);
+        dest.writeLong(callDuration);
+        dest.writeLong(callStartDatetime);
+        dest.writeLong(createdDatetime);
+        dest.writeByte((byte) (isMeeting ? 1 : 0));
+        dest.writeString(memoText);
+        dest.writeLong(scheduleDatetime);
+        dest.writeString(contactName);
+        dest.writeString(contactCompany);
+        dest.writeString(contactEmail);
+        dest.writeList(contactPhones);
+        dest.writeByte((byte) (uploaded ? 1 : 0));
     }
 
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<Reminder> CREATOR = new Parcelable.Creator<Reminder>() {
+        @Override
+        public Reminder createFromParcel(Parcel in) {
+            return new Reminder(in);
+        }
+
+        @Override
+        public Reminder[] newArray(int size) {
+            return new Reminder[size];
+        }
+    };
 }
