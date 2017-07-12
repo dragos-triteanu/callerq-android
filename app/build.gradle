@@ -41,13 +41,14 @@ dependencies {
     compile 'com.google.android.gms:play-services-auth:11.0.2'
     compile 'com.google.android.gms:play-services-analytics:11.0.2'
     compile 'com.github.bumptech.glide:glide:4.0.0-RC1'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC1'
     compile 'com.google.dagger:dagger:2.11'
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.11'
     compile 'com.jakewharton:butterknife:8.6.0'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
-    compile ('com.weiwangcn.betterspinner:library:1.1.0')
+    compile 'com.weiwangcn.betterspinner:library:1.1.0'
     testCompile 'junit:junit:4.12'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC1'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.11'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
 }
+
 
 apply plugin: 'com.google.gms.google-services'
