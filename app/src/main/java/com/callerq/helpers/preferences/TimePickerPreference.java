@@ -37,7 +37,6 @@ public class TimePickerPreference extends DialogPreference {
 
     @Override
     protected View onCreateDialogView() {
-        // TODO: Give the time picker 24 hour format
         picker = new TimePicker(getContext());
         picker.setIs24HourView(true);
         return (picker);

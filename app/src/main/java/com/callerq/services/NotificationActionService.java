@@ -23,6 +23,8 @@ import com.callerq.models.Reminder;
 import com.callerq.utils.CallConstants;
 import com.callerq.utils.RequestCodes;
 
+import java.util.Calendar;
+
 public class NotificationActionService extends IntentService {
     private static final String TAG = "NotifActionService: ";
 
@@ -66,9 +68,10 @@ public class NotificationActionService extends IntentService {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         int snoozeReminderDuration = prefs.getInt("pref_snooze_duration", 5);
 
-        // TODO: check why the pending intent doesn't snooze for the right amount of time
-        // TODO: change to 60000 after that
-        int snoozeInMillies = snoozeReminderDuration * 1000;
+        // TODO: change to Calendar.MINUTE after that
+
+        Calendar snoozeCalendar = Calendar.getInstance();
+        snoozeCalendar.add(Calendar.SECOND, snoozeReminderDuration);
 
         Intent scheduleIntent = new Intent(this, ScheduleService.class).setAction("scheduleNotification");
 
@@ -81,7 +84,7 @@ public class NotificationActionService extends IntentService {
 
         // Get the AlarmManager service
         AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-        am.set(AlarmManager.RTC_WAKEUP, snoozeInMillies, sender);
+        am.set(AlarmManager.RTC_WAKEUP, snoozeCalendar.getTimeInMillis(), sender);
     }
 
     private void onCall(Reminder reminder) {
@@ -106,7 +109,8 @@ public class NotificationActionService extends IntentService {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         int snoozeCallDuration = prefs.getInt("pref_snooze_duration", 5);
 
-        int snoozeInMillies = snoozeCallDuration * 1000;
+        Calendar snoozeCalendar = Calendar.getInstance();
+        snoozeCalendar.add(Calendar.SECOND, snoozeCallDuration);
 
         Intent reminderIntent = new Intent(this, ReminderService.class).setAction("reminderNotification");
 
@@ -119,7 +123,7 @@ public class NotificationActionService extends IntentService {
 
         // Get the AlarmManager service
         AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-        am.set(AlarmManager.RTC_WAKEUP, snoozeInMillies, sender);
+        am.set(AlarmManager.RTC_WAKEUP, snoozeCalendar.getTimeInMillis(), sender);
     }
 }
 

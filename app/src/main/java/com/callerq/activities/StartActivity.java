@@ -12,16 +12,15 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
-import com.callerq.CallerqApplication;
 import com.callerq.R;
 import com.callerq.helpers.PreferencesHelper;
-import com.callerq.services.ScheduleService;
 import com.callerq.utils.NetworkUtilities;
 import com.callerq.utils.RequestCodes;
 import com.google.android.gms.auth.api.Auth;
@@ -36,14 +35,14 @@ import com.google.android.gms.common.api.Status;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
-
-public class StartActivity extends CallerqActivity implements GoogleApiClient.OnConnectionFailedListener {
+public class StartActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "StartActivity";
     private static final int RC_SIGN_IN = 9001;
     private static final int UI_ANIMATION_DELAY = 300;
+
     private final Handler mHideHandler = new Handler();
+
     private final Runnable mHideRunnable = new Runnable() {
         @Override
         public void run() {
@@ -57,8 +56,7 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
             mHideHandler.postDelayed(mHidePartRunnable, UI_ANIMATION_DELAY);
         }
     };
-    @Inject
-    ScheduleService scheduleService;
+
     private View mContentView;
     // Runnable for hiding the status and navigation bar
     private final Runnable mHidePartRunnable = new Runnable() {
@@ -141,12 +139,6 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
                 onLogin();
             }
         });
-
-    }
-
-    @Override
-    void injectDependencies() {
-        CallerqApplication.APP.inject(this);
     }
 
     @Override
@@ -279,6 +271,7 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
         assert account != null;
         String token = account.getIdToken();
 
+        // TODO: Configure the server to accept the token
         onRegister(token);
 
         Intent intent = new Intent(StartActivity.this, MainActivity.class);

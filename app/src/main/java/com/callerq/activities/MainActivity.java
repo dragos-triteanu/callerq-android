@@ -22,6 +22,7 @@ import android.support.v4.content.Loader;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.*;
@@ -30,41 +31,43 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.callerq.CallerqApplication;
 import com.callerq.R;
 import com.callerq.fragments.HomeFragment;
 import com.callerq.fragments.RemindersFragment;
 import com.callerq.helpers.DatabaseHelper;
 import com.callerq.models.Reminder;
-import com.callerq.services.ScheduleService;
 import com.callerq.utils.RequestCodes;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import javax.inject.Inject;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class MainActivity extends CallerqActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener, DatabaseHelper.DatabaseListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener, DatabaseHelper.DatabaseListener {
 
     private static final String TAG = "MainActivity";
     private static final int PICK_CONTACT = 0;
+
     public static boolean isRunning = false;
     public static boolean displayReminders = false;
+
     GoogleSignInAccount account;
+
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+
     @BindView(R.id.fab)
     FloatingActionButton fab;
+
     @BindView(R.id.drawer_layout)
     DrawerLayout drawer;
+
     @BindView(R.id.nav_view)
     NavigationView navigationView;
-    @Inject
-    ScheduleService scheduleService;
+
     private Intent callIntent;
     private Boolean doubleBackToExitPressedOnce = false;
 
@@ -202,11 +205,6 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
 
         item.setChecked(true);
         setTitle(item.getTitle());
-    }
-
-    @Override
-    void injectDependencies() {
-        CallerqApplication.APP.inject(this);
     }
 
     @Override

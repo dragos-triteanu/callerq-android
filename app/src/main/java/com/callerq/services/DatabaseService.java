@@ -88,7 +88,6 @@ public class DatabaseService extends IntentService {
 
     private void saveReminder(Reminder reminder) {
         writeReminderToLocalDatabase(reminder);
-        // TODO: handle when to upload reminders
         uploadReminders();
     }
 

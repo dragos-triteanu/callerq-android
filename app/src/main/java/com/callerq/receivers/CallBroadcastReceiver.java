@@ -27,9 +27,11 @@ public class CallBroadcastReceiver extends BroadcastReceiver implements AddressB
     private static Calendar callStartedTime;
     private static Calendar callStopTime;
     private static String getContactRequestId;
+
+    private Context context;
+
     @Inject
     ScheduleService schedulingService;
-    private Context context;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -85,8 +87,9 @@ public class CallBroadcastReceiver extends BroadcastReceiver implements AddressB
             } else {
                 contactName = "";
             }
-            // TODO: check why this method is triggered 3 times
+
             schedulingService.sendNotificationAfterCall(context, new CallDetails(contactName, phoneNumber, callStartedTime, callStopTime));
+            getContactRequestId = "";
         }
 
     }

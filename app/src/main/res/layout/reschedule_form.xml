@@ -64,7 +64,7 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:hint="@string/company_input_hint"
-            android:inputType="text"/>
+            android:inputType="text|textCapSentences"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -81,7 +81,8 @@
             android:textSize="16sp"
             android:hint="@string/notes_input_hint"
             android:maxLines="3"
-            android:inputType="textMultiLine"/>
+            android:inputType="textMultiLine|textCapSentences"/>
+
     </android.support.design.widget.TextInputLayout>
 
     <CheckBox

@@ -42,7 +42,6 @@ import com.callerq.utils.RequestCodes;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.weiwangcn.betterspinner.library.BetterSpinner;
 
-import javax.inject.Inject;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -98,9 +97,6 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
     @Nullable
     @BindView(R.id.savedDateAndTime)
     TextView savedDateAndTime;
-
-    @Inject
-    ScheduleService scheduleService;
 
     private ViewGroup mContainerView;
     private ViewGroup formView;
