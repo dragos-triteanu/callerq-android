@@ -44,18 +44,16 @@ public class SettingsActivity extends AppCompatActivity implements ListView.OnIt
     }
 
 
-
     @Override
     public void onFragmentComplete() {
         assert settingsFragment.getView() != null;
         ListView settingsList = settingsFragment.getView().findViewById(R.id.settingsList);
 
-        String[] settingsOptions = { "General", "Notifications", "Privacy" };
+        String[] settingsOptions = {"General", "Notifications", "Privacy"};
 
         ArrayAdapter arrayAdapter = new ArrayAdapter<>(this, R.layout.settings_list, R.id.settingsTitle, settingsOptions);
 
         settingsList.setAdapter(arrayAdapter);
-        settingsList.addFooterView(new View(this));
 
         settingsList.setOnItemClickListener(this);
 

@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <CheckBoxPreference
-        android:key="pref_key_auto_delete"
-        android:summary="Just a test"
-        android:title="Checkbox test"
-        android:defaultValue="false" />
-    <Preference
-        android:key="pref_key_sms_delete_limit"
-        android:dependency="pref_key_auto_delete"
-        android:summary="Another test"
-        android:title="Preference title" />
-    <Preference
-        android:key="pref_key_mms_delete_limit"
-        android:dependency="pref_key_auto_delete"
-        android:summary="A third test"
-        android:title="Preference title 2" />
+    <PreferenceCategory
+        android:key="pref_notifications_settings"
+        android:title="@string/notifications_alerts_title">
+
+        <SwitchPreference
+            android:key="pref_alert_sound"
+            android:title="@string/alert_sound_title"
+            android:defaultValue="true"/>
+
+        <SwitchPreference
+            android:key="pref_alert_vibrate"
+            android:title="@string/alert_vibrate_title"
+            android:defaultValue="true"/>
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

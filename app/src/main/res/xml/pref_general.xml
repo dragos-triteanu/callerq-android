@@ -1,20 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-        <CheckBoxPreference
-            android:key="pref_key_auto_delete"
-            android:summary="Just a test"
-            android:title="Checkbox test"
-            android:defaultValue="false" />
-        <Preference
-            android:key="pref_key_sms_delete_limit"
-            android:dependency="pref_key_auto_delete"
-            android:summary="Another test"
-            android:title="Preference title" />
-        <Preference
-            android:key="pref_key_mms_delete_limit"
-            android:dependency="pref_key_auto_delete"
-            android:summary="A third test"
-            android:title="Preference title 2" />
+    <PreferenceCategory
+        android:title="Reminder settings"
+        android:key="pref_reminder_settings">
+
+        <com.callerq.helpers.preferences.NumberPickerPreference
+            android:defaultValue="5"
+            android:dialogTitle="Snooze duration in minutes"
+            android:key="pref_snooze_duration"
+            android:summary="@string/snooze_duration_summary"
+            android:title="@string/snooze_duration_title"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Time values"
+        android:key="pref_reminder_settings">
+
+        <com.callerq.helpers.preferences.TimePickerPreference
+            android:defaultValue="8"
+            android:dialogTitle=""
+            android:key="pref_morning_time"
+            android:title="@string/morning_time_title"/>
+
+        <com.callerq.helpers.preferences.TimePickerPreference
+            android:defaultValue="14"
+            android:dialogTitle=""
+            android:key="pref_afternoon_time"
+            android:title="@string/afternoon_time_title"/>
+
+        <com.callerq.helpers.preferences.TimePickerPreference
+            android:defaultValue="20"
+            android:dialogTitle=""
+            android:key="pref_evening_time"
+            android:title="@string/evening_time_title"/>
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

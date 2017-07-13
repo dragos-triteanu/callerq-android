@@ -7,7 +7,7 @@
     <ListView
         android:id="@+id/settingsList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:divider="@drawable/horizontal_divider"
         android:footerDividersEnabled="true"/>
 

@@ -2,19 +2,9 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <CheckBoxPreference
-        android:key="pref_key_auto_delete"
-        android:summary="Just a test"
-        android:title="Checkbox test"
-        android:defaultValue="false" />
-    <Preference
-        android:key="pref_key_sms_delete_limit"
-        android:dependency="pref_key_auto_delete"
-        android:summary="Another test"
-        android:title="Preference title" />
-    <Preference
-        android:key="pref_key_mms_delete_limit"
-        android:dependency="pref_key_auto_delete"
-        android:summary="A third test"
-        android:title="Preference title 2" />
+        android:key="pref_send_usage_data"
+        android:summary="@string/send_usage_data_summary"
+        android:title="@string/send_usage_data_title"
+        android:defaultValue="true" />
 
 </PreferenceScreen>
