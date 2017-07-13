@@ -1,31 +1,27 @@
 package com.callerq.services;
 
-import android.Manifest;
-import android.app.*;
-import android.content.ActivityNotFoundException;
+import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
+import android.content.SharedPreferences;
+import android.media.RingtoneManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
+import android.preference.PreferenceManager;
 import android.support.v7.app.NotificationCompat;
-import android.util.Log;
 import com.callerq.R;
-import com.callerq.activities.RescheduleActivity;
 import com.callerq.models.Reminder;
 import com.callerq.utils.CallConstants;
-import com.callerq.utils.RequestCodes;
 
 public class ReminderService extends IntentService {
 
     // constants
 
     private static final String TAG = "ReminderService: ";
-    public static final int NOTIFICATION_ID = 2;
     public static final String REMINDER = "reminderDetails";
-
-    private static final long SNOOZE_INTERVAL_MILLIS = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
+    public static final int NOTIFICATION_ID = 2;
 
     public ReminderService() {
         super("ReminderService");
@@ -57,12 +53,28 @@ public class ReminderService extends IntentService {
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
 
         notificationBuilder.setAutoCancel(false)
-                .setDefaults(Notification.DEFAULT_ALL)
                 .setWhen(System.currentTimeMillis())
                 .setSmallIcon(R.mipmap.ic_logo)
-                .setContentTitle("Call " + reminder.getContactName())
                 .setContentText(reminder.getMemoText().isEmpty() ? "No additional notes" : reminder.getMemoText())
-                .setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_SOUND | Notification.FLAG_AUTO_CANCEL | Notification.FLAG_ONGOING_EVENT);
+                .setDefaults(Notification.DEFAULT_LIGHTS | Notification.FLAG_AUTO_CANCEL | Notification.FLAG_ONGOING_EVENT);
+
+        String reminderTitle;
+
+        if (reminder.isMeeting()) {
+            reminderTitle = getString(R.string.calendar_event_title_meeting) + " " + reminder.getContactName();
+        } else {
+            reminderTitle = getString(R.string.calendar_event_title_call) + " " + reminder.getContactName();
+        }
+
+        notificationBuilder.setContentTitle(reminderTitle);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        if (prefs.getBoolean("pref_alert_sound", true)) {
+            notificationBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+        }
+        if (prefs.getBoolean("pref_alert_vibrate", true)) {
+            notificationBuilder.setVibrate(new long[]{1000, 1000, 1000});
+        }
 
         PendingIntent callPendingIntent = PendingIntent.getService(context, 0, callIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         PendingIntent cancelPendingIntent = PendingIntent.getService(context, 0, snoozeIntent, PendingIntent.FLAG_CANCEL_CURRENT);

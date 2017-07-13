@@ -16,7 +16,6 @@
     <string name="play_services_connection_error">Google Play Services connection failed</string>
     <string name="google_sign_in_error">Sign in with Google failed</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="welcome_to_callerq">Welcome to CallerQ !</string>
 
@@ -33,5 +32,34 @@
     <string name="ignore_dialog_title">Ignore this number</string>
     <string name="ignore_dialog_positive">I\'m sure</string>
     <string name="ignore_dialog_negative">Never mind</string>
+    <string name="version_no">Version no. 1.0.25</string>
+    <string name="no_reminders">No reminders to display</string>
+    <string name="user_name_placeholder">John Doe</string>
+    <string name="user_email_placeholder">johndoe@callerq.com</string>
+    <string name="reminder_title">Title</string>
+    <string name="reminder_date_time">Date - Time</string>
+    <string name="reminder_canceled">Reminder canceled</string>
+    <string name="never_ask_for_this_contact">Never ask for this contact</string>
+    <string name="view_reminders">View reminders</string>
+    <string name="name_input_hint">Name</string>
+    <string name="company_input_hint">Company</string>
+    <string name="notes_input_hint">Notes</string>
+    <string name="reminder_as_meeting">Set this reminder as a meeting</string>
+    <string name="date_input_hint">Date</string>
+    <string name="time_input_hint">Time</string>
+    <string name="reminder_saved">Reminder saved</string>
+    <string name="saved_title">Title</string>
+    <string name="saved_date_and_time">Date and time</string>
+    <string name="settings_title">Title</string>
+    <string name="morning_time_title">Morning time</string>
+    <string name="afternoon_time_title">Afternoon time</string>
+    <string name="evening_time_title">Evening time</string>
+    <string name="notifications_alerts_title">Notifications alerts</string>
+    <string name="alert_sound_title">Alert sound</string>
+    <string name="alert_vibrate_title">Vibrate</string>
+    <string name="send_usage_data_summary">Let us collect and use software data to improve your experience</string>
+    <string name="send_usage_data_title">Send usage data</string>
+    <string name="snooze_duration_summary">Set the snooze duration for reminder notifications</string>
+    <string name="snooze_duration_title">Snooze duration</string>
 
 </resources>

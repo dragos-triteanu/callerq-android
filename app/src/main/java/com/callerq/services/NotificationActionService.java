@@ -8,9 +8,11 @@ import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
@@ -21,14 +23,8 @@ import com.callerq.models.Reminder;
 import com.callerq.utils.CallConstants;
 import com.callerq.utils.RequestCodes;
 
-import javax.inject.Inject;
-import java.util.List;
-
 public class NotificationActionService extends IntentService {
     private static final String TAG = "NotifActionService: ";
-
-    @Inject
-    CalendarService calendarService;
 
     public NotificationActionService() {
         super(NotificationActionService.class.getSimpleName());
@@ -67,9 +63,12 @@ public class NotificationActionService extends IntentService {
 
     private void snoozeReminder(CallDetails callDetails) {
 
-        int snoozeReminderDuration = 1;
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        int snoozeReminderDuration = prefs.getInt("pref_snooze_duration", 5);
 
-        int snoozeInMillies = snoozeReminderDuration * 5000;
+        // TODO: check why the pending intent doesn't snooze for the right amount of time
+        // TODO: change to 60000 after that
+        int snoozeInMillies = snoozeReminderDuration * 1000;
 
         Intent scheduleIntent = new Intent(this, ScheduleService.class).setAction("scheduleNotification");
 
@@ -104,9 +103,10 @@ public class NotificationActionService extends IntentService {
 
     private void snoozeCall(Reminder reminder) {
 
-        int snoozeCallDuration = 1;
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        int snoozeCallDuration = prefs.getInt("pref_snooze_duration", 5);
 
-        int snoozeInMillies = snoozeCallDuration * 5000;
+        int snoozeInMillies = snoozeCallDuration * 1000;
 
         Intent reminderIntent = new Intent(this, ReminderService.class).setAction("reminderNotification");
 

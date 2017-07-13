@@ -13,7 +13,7 @@ import java.util.HashSet;
 
 public class PreferencesHelper {
 
-    private static final String TAG = "PreferencesHelper";
+    private static final String TAG = "PreferencesHelper: ";
     private static final String PREF_TERMS_ACCEPTED = "termsAccepted";
     private static final String PREFERENCES_LOGIN_TOKEN = "loginToken";
     private static final String PREFERENCES_ANALYTICS_ENABLED = "analyticsEnabled";

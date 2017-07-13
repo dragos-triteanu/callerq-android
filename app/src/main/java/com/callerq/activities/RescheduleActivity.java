@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
@@ -210,7 +211,7 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         assert savedTitle != null;
         savedTitle.setText(eventTitle);
         assert savedDateAndTime != null;
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("d/M/yy hh:mm", Locale.US);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("d/M/yy HH:mm", Locale.US);
         savedDateAndTime.setText(simpleDateFormat.format(setCalendar.getTime()));
     }
 
@@ -253,7 +254,7 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
 
         alertDialog.setTitle(R.string.ignore_dialog_title);
 
-        String numberToIgnore = contact != null ? contact.name : PhoneNumberUtils.formatNumber(phoneNumber);
+        String numberToIgnore = (contact != null) ? contact.name : PhoneNumberUtils.formatNumber(phoneNumber);
 
         alertDialog.setMessage("We will not show you any more notifications for " + numberToIgnore + "\n\nAre you sure?");
         alertDialog.setPositiveButton(R.string.ignore_dialog_positive,
@@ -498,6 +499,13 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
                     case 2:
                         DatePickerDialog datePickerDialog = new DatePickerDialog(RescheduleActivity.this, RescheduleActivity.this,
                                 setCalendar.get(Calendar.YEAR), setCalendar.get(Calendar.MONTH), setCalendar.get(Calendar.DAY_OF_MONTH));
+                        datePickerDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialogInterface) {
+                                dateInput.clearFocus();
+                                dateInput.requestFocus();
+                            }
+                        });
                         datePickerDialog.show();
                         dateInput.setTextColor(Color.BLACK);
                         break;
@@ -517,8 +525,14 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
 
         timeInput.setAdapter(timeArrayAdapter);
         timeInput.setText(timeArray[0]);
-        setCalendar.set(Calendar.HOUR_OF_DAY, 8);
-        setCalendar.set(Calendar.MINUTE, 0);
+
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(RescheduleActivity.this);
+
+        final Calendar prefTimes = Calendar.getInstance();
+        prefTimes.setTimeInMillis(prefs.getLong("pref_morning_time", 28800000));
+
+        setCalendar.set(Calendar.HOUR_OF_DAY, prefTimes.get(Calendar.HOUR_OF_DAY));
+        setCalendar.set(Calendar.MINUTE, prefTimes.get(Calendar.MINUTE));
 
         timeInput.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -531,17 +545,33 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
 
                 switch (itemClicked) {
                     case 0:
-                        setCalendar.set(Calendar.HOUR_OF_DAY, 8);
+                        prefTimes.setTimeInMillis(prefs.getLong("pref_morning_time", 28800000));
+
+                        setCalendar.set(Calendar.HOUR_OF_DAY, prefTimes.get(Calendar.HOUR_OF_DAY));
+                        setCalendar.set(Calendar.MINUTE, prefTimes.get(Calendar.MINUTE));
                         break;
                     case 1:
-                        setCalendar.set(Calendar.HOUR_OF_DAY, 14);
+                        prefTimes.setTimeInMillis(prefs.getLong("pref_afternoon_time", 50400000));
+
+                        setCalendar.set(Calendar.HOUR_OF_DAY, prefTimes.get(Calendar.HOUR_OF_DAY));
+                        setCalendar.set(Calendar.MINUTE, prefTimes.get(Calendar.MINUTE));
                         break;
                     case 2:
-                        setCalendar.set(Calendar.HOUR_OF_DAY, 19);
+                        prefTimes.setTimeInMillis(prefs.getLong("pref_evening_time", 72000000));
+
+                        setCalendar.set(Calendar.HOUR_OF_DAY, prefTimes.get(Calendar.HOUR_OF_DAY));
+                        setCalendar.set(Calendar.MINUTE, prefTimes.get(Calendar.MINUTE));
                         break;
                     case 3:
                         TimePickerDialog timePickerDialog = new TimePickerDialog(RescheduleActivity.this, RescheduleActivity.this,
                                 setCalendar.get(Calendar.HOUR_OF_DAY), setCalendar.get(Calendar.MINUTE), true);
+                        timePickerDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialogInterface) {
+                                timeInput.clearFocus();
+                                timeInput.requestFocus();
+                            }
+                        });
                         timePickerDialog.show();
                         timeInput.setTextColor(Color.BLACK);
                         break;
@@ -628,31 +658,6 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         return true;
     }
 
-    private class MyTextWatcher implements TextWatcher {
-
-        private MyTextWatcher() {
-
-        }
-
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            showSubmitButton();
-            validateName();
-            validateDate();
-            validateTime();
-        }
-    }
-
     private void validateDateAndTime() {
         Calendar currentTime = Calendar.getInstance();
         Calendar yesterday = Calendar.getInstance();
@@ -695,5 +700,30 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
     private void disableSubmitButton() {
         buttonSubmitDisabled.setVisibility(View.VISIBLE);
         buttonSubmit.setVisibility(View.INVISIBLE);
+    }
+
+    private class MyTextWatcher implements TextWatcher {
+
+        private MyTextWatcher() {
+
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            showSubmitButton();
+            validateName();
+            validateDate();
+            validateTime();
+        }
     }
 }

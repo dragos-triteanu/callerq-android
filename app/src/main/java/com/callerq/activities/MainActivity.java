@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -23,12 +24,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.view.*;
+import android.widget.*;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.bumptech.glide.Glide;
@@ -46,33 +43,29 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import javax.inject.Inject;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class MainActivity extends CallerqActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener, DatabaseHelper.DatabaseListener {
 
     private static final String TAG = "MainActivity";
-    public static boolean isRunning = false;
     private static final int PICK_CONTACT = 0;
+    public static boolean isRunning = false;
     public static boolean displayReminders = false;
-    private Intent callIntent;
-
     GoogleSignInAccount account;
-
     @BindView(R.id.toolbar)
     Toolbar toolbar;
-
     @BindView(R.id.fab)
     FloatingActionButton fab;
-
     @BindView(R.id.drawer_layout)
     DrawerLayout drawer;
-
     @BindView(R.id.nav_view)
     NavigationView navigationView;
-
     @Inject
     ScheduleService scheduleService;
-
+    private Intent callIntent;
     private Boolean doubleBackToExitPressedOnce = false;
 
     private Fragment remindersFragment;
@@ -319,6 +312,77 @@ public class MainActivity extends CallerqActivity implements NavigationView.OnNa
 
     @Override
     public void gotReminders(ArrayList<Reminder> reminders) {
-        // TODO: Get the reminders and display them in the fragment
+        assert remindersFragment.getView() != null;
+
+        ListView remindersList = remindersFragment.getView().findViewById(R.id.remindersList);
+
+        ReminderAdapter reminderAdapter = new ReminderAdapter(this, reminders);
+
+        remindersList.setAdapter(reminderAdapter);
+
+        if (reminderAdapter.getCount() == 0) {
+            remindersFragment.getView().findViewById(R.id.remindersEmpty).setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    private class ReminderAdapter extends ArrayAdapter<Reminder> {
+
+        private ReminderAdapter(Context context, ArrayList<Reminder> users) {
+            super(context, 0, users);
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+            // Get the data item for this position
+            Reminder reminder = getItem(position);
+            // Check if an existing view is being reused, otherwise inflate the view
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.reminders_list, parent, false);
+            }
+            // Lookup view for data population
+            TextView reminderTitle = convertView.findViewById(R.id.reminderTitle);
+            TextView reminderDateTime = convertView.findViewById(R.id.reminderDateTime);
+            // Populate the data into the template view using the data object
+
+            assert reminder != null;
+            if (reminder.isMeeting()) {
+                reminderTitle.setText(getString(R.string.calendar_event_title_meeting) + " " + reminder.getContactName());
+            } else {
+                reminderTitle.setText(getString(R.string.calendar_event_title_call) + " " + reminder.getContactName());
+            }
+
+            SimpleDateFormat simpleDateFormat;
+            Calendar currentCalendar = Calendar.getInstance();
+            int today = currentCalendar.get(Calendar.DAY_OF_YEAR);
+
+            currentCalendar.add(Calendar.DAY_OF_YEAR, 1);
+            int tomorrow = currentCalendar.get(Calendar.DAY_OF_YEAR);
+
+            Calendar scheduledCalendar = Calendar.getInstance();
+            scheduledCalendar.setTimeInMillis(reminder.getScheduleDatetime());
+
+            String dateTimeText = "";
+
+            if (scheduledCalendar.get(Calendar.YEAR) == currentCalendar.get(Calendar.YEAR)) {
+                if (scheduledCalendar.get(Calendar.DAY_OF_YEAR) == today) {
+                    simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.US);
+                    dateTimeText = "Today, ";
+                } else if (scheduledCalendar.get(Calendar.DAY_OF_YEAR) == tomorrow) {
+                    simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.US);
+                    dateTimeText = "Tomorrow, ";
+                } else {
+                    simpleDateFormat = new SimpleDateFormat("E, MMMM dd, HH:mm", Locale.US);
+                }
+            } else {
+                simpleDateFormat = new SimpleDateFormat("E, MMMM dd, yyyy, HH:mm", Locale.US);
+            }
+
+            dateTimeText += simpleDateFormat.format(reminder.getScheduleDatetime());
+            reminderDateTime.setText(dateTimeText);
+            // Return the completed view to render on screen
+            return convertView;
+        }
     }
 }

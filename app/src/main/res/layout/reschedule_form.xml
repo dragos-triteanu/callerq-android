@@ -47,7 +47,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:hint="Name"
+            android:hint="@string/name_input_hint"
             android:inputType="textPersonName|textCapWords"/>
 
     </android.support.design.widget.TextInputLayout>
@@ -63,7 +63,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:hint="Company"
+            android:hint="@string/company_input_hint"
             android:inputType="text"/>
 
     </android.support.design.widget.TextInputLayout>
@@ -79,7 +79,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:hint="Notes"
+            android:hint="@string/notes_input_hint"
             android:maxLines="3"
             android:inputType="textMultiLine"/>
     </android.support.design.widget.TextInputLayout>
@@ -88,7 +88,7 @@
         android:id="@+id/meetingCheckbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Set this reminder as a meeting"
+        android:text="@string/reminder_as_meeting"
         android:layout_marginTop="3dp"/>
 
     <android.support.design.widget.TextInputLayout
@@ -101,8 +101,8 @@
             android:id="@+id/dateInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Date"
-            android:text="Date"
+            android:hint="@string/date_input_hint"
+            android:text="@string/date_input_hint"
             android:textSize="16sp"/>
 
     </android.support.design.widget.TextInputLayout>
@@ -117,8 +117,8 @@
             android:id="@+id/timeInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Time"
-            android:text="Time"
+            android:hint="@string/time_input_hint"
+            android:text="@string/time_input_hint"
             android:textSize="16sp"/>
 
     </android.support.design.widget.TextInputLayout>

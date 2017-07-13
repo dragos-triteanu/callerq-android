@@ -6,15 +6,8 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 import com.callerq.R;
-import com.callerq.helpers.AddressBookHelper;
 import com.callerq.helpers.DatabaseHelper;
-import com.callerq.models.Reminder;
-import com.callerq.services.DatabaseService;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
 
 public class RemindersFragment extends Fragment {
 
@@ -26,7 +19,6 @@ public class RemindersFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
-
 
 
     @Override

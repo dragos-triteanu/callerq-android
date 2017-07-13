@@ -32,7 +32,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="21dp"
-                android:text="Reminder saved"
+                android:text="@string/reminder_saved"
                 android:textColor="@color/colorBlack"
                 android:textSize="16sp"
                 android:alpha="0.8"/>
@@ -42,7 +42,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="21dp"
-                android:text="Title"
+                android:text="@string/saved_title"
                 android:textColor="@color/colorBlack"
                 android:textSize="12sp"
                 android:layout_marginTop="5dp"
@@ -53,7 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="21dp"
-                android:text="Date and time"
+                android:text="@string/saved_date_and_time"
                 android:textColor="@color/colorBlack"
                 android:textSize="12sp"
                 android:alpha="0.8"/>
@@ -83,7 +83,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="17dp"
-            android:text="View reminders"
+            android:text="@string/view_reminders"
             android:textSize="15sp"
             android:textColor="@color/colorBlack"
             android:alpha="0.7"/>

@@ -6,7 +6,6 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Bundle;
 import android.util.Log;
 import com.callerq.helpers.PreferencesHelper;
 import com.callerq.helpers.SQLiteHelper;
@@ -15,7 +14,6 @@ import com.callerq.utils.NetworkUtilities;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -32,13 +30,11 @@ public class DatabaseService extends IntentService {
     public static final String ACTION_SAVED_REMINDER = "com.callerq.DatabaseService.savedReminder";
     public static final String ACTION_GET_REMINDERS = "com.callerq.DatabaseService.getReminders";
     public static final String ACTION_GOT_REMINDERS = "com.callerq.DatabaseService.gotReminders";
-
-    private SQLiteDatabase database;
-
     private static final long UPLOAD_DEFAULT_RETRY_INTERVAL = AlarmManager.INTERVAL_HALF_HOUR; // 30
-                                                                                               // minutes
+    // minutes
     private static final long UPLOAD_MAX_RETRY_INTERVAL = 2 * AlarmManager.INTERVAL_HOUR; // 2
-                                                                                          // hours
+    private SQLiteDatabase database;
+    // hours
 
     public DatabaseService() {
         super("DatabaseService");
@@ -54,35 +50,39 @@ public class DatabaseService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         String action = intent.getAction();
-        Bundle extras = intent.getBundleExtra("reminderBundle");
         Log.d(TAG, "Received new intent to handle; action = " + action);
-        if (action.equals(ACTION_SAVE_REMINDER) && extras != null
-                && !extras.isEmpty()) {
-            Reminder reminder = (Reminder) extras.getSerializable(PARAM_REMINDER);
-            saveReminder(reminder);
-            Intent responseIntent = new Intent(ACTION_SAVED_REMINDER);
-            responseIntent.setData(intent.getData());
-            sendBroadcast(responseIntent);
-        } else if (action.equals(ACTION_ATTEMPT_UPLOAD)) {
-            // implement exponential backoff
-            long currentRetryInterval = PreferencesHelper
-                    .getRetryInterval(this);
-            if (currentRetryInterval * 2 <= UPLOAD_MAX_RETRY_INTERVAL) {
-                PreferencesHelper.setRetryInterval(this,
-                        currentRetryInterval * 2);
-            } else {
-                PreferencesHelper.setRetryInterval(this,
-                        UPLOAD_MAX_RETRY_INTERVAL);
+        switch (action) {
+            case ACTION_SAVE_REMINDER: {
+                Reminder reminder = intent.getParcelableExtra(PARAM_REMINDER);
+                saveReminder(reminder);
+                Intent responseIntent = new Intent(ACTION_SAVED_REMINDER);
+                responseIntent.setData(intent.getData());
+                sendBroadcast(responseIntent);
+                break;
             }
+            case ACTION_ATTEMPT_UPLOAD:
+                // implement exponential backoff
+                long currentRetryInterval = PreferencesHelper
+                        .getRetryInterval(this);
+                if (currentRetryInterval * 2 <= UPLOAD_MAX_RETRY_INTERVAL) {
+                    PreferencesHelper.setRetryInterval(this,
+                            currentRetryInterval * 2);
+                } else {
+                    PreferencesHelper.setRetryInterval(this,
+                            UPLOAD_MAX_RETRY_INTERVAL);
+                }
 
-            uploadReminders();
-        } else if (action.equals(ACTION_GET_REMINDERS)) {
-            ArrayList<Reminder> reminders = getRemindersToDisplay();
+                uploadReminders();
+                break;
+            case ACTION_GET_REMINDERS: {
+                ArrayList<Reminder> reminders = getRemindersToDisplay();
 
-            Intent responseIntent = new Intent(ACTION_GOT_REMINDERS);
-            responseIntent.putParcelableArrayListExtra("remindersToDisplay", reminders);
-            responseIntent.setData(intent.getData());
-            sendBroadcast(responseIntent);
+                Intent responseIntent = new Intent(ACTION_GOT_REMINDERS);
+                responseIntent.putParcelableArrayListExtra("remindersToDisplay", reminders);
+                responseIntent.setData(intent.getData());
+                sendBroadcast(responseIntent);
+                break;
+            }
         }
     }
 
@@ -102,7 +102,7 @@ public class DatabaseService extends IntentService {
     private Reminder getReminderById(long id) {
         openReadableDatabase();
         Reminder result = null;
-        String[] selectArgs = { Long.toString(id) };
+        String[] selectArgs = {Long.toString(id)};
         Cursor results = database.query(SQLiteHelper.REMINDER_TABLE_NAME, null, "_id = ?",
                 selectArgs, null, null, null, "1");
         if (results.moveToFirst()) {
@@ -195,7 +195,7 @@ public class DatabaseService extends IntentService {
                 try {
                     String jsonResult = NetworkUtilities
                             .postReminders(this, remindersToUpload);
-                     JSONObject result = new JSONObject(jsonResult);
+                    JSONObject result = new JSONObject(jsonResult);
 
                     boolean success = result.getBoolean("success");
                     if (success) {

@@ -1,20 +1,30 @@
 package com.callerq.models;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.ContentValues;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Reminder implements Parcelable {
 
-    private static final long serialVersionUID = 5124200187921054968L;
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<Reminder> CREATOR = new Parcelable.Creator<Reminder>() {
+        @Override
+        public Reminder createFromParcel(Parcel in) {
+            return new Reminder(in);
+        }
 
+        @Override
+        public Reminder[] newArray(int size) {
+            return new Reminder[size];
+        }
+    };
+    private static final long serialVersionUID = 5124200187921054968L;
     private long id;
     private long callDuration;
     private long callStartDatetime;
@@ -31,6 +41,22 @@ public class Reminder implements Parcelable {
     public Reminder() {
         id = (int) (Math.random() * 2147483647);
         uploaded = false;
+    }
+
+    protected Reminder(Parcel in) {
+        id = in.readLong();
+        callDuration = in.readLong();
+        callStartDatetime = in.readLong();
+        createdDatetime = in.readLong();
+        isMeeting = in.readByte() != 0;
+        memoText = in.readString();
+        scheduleDatetime = in.readLong();
+        contactName = in.readString();
+        contactCompany = in.readString();
+        contactEmail = in.readString();
+        contactPhones = new ArrayList<>();
+        in.readList(contactPhones, String.class.getClassLoader());
+        uploaded = in.readByte() != 0;
     }
 
     public long getId() {
@@ -200,23 +226,6 @@ public class Reminder implements Parcelable {
 
     }
 
-
-    protected Reminder(Parcel in) {
-        id = in.readLong();
-        callDuration = in.readLong();
-        callStartDatetime = in.readLong();
-        createdDatetime = in.readLong();
-        isMeeting = in.readByte() != 0;
-        memoText = in.readString();
-        scheduleDatetime = in.readLong();
-        contactName = in.readString();
-        contactCompany = in.readString();
-        contactEmail = in.readString();
-        contactPhones = new ArrayList<>();
-        in.readList(contactPhones, String.class.getClassLoader());
-        uploaded = in.readByte() != 0;
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -237,17 +246,4 @@ public class Reminder implements Parcelable {
         dest.writeList(contactPhones);
         dest.writeByte((byte) (uploaded ? 1 : 0));
     }
-
-    @SuppressWarnings("unused")
-    public static final Parcelable.Creator<Reminder> CREATOR = new Parcelable.Creator<Reminder>() {
-        @Override
-        public Reminder createFromParcel(Parcel in) {
-            return new Reminder(in);
-        }
-
-        @Override
-        public Reminder[] newArray(int size) {
-            return new Reminder[size];
-        }
-    };
 }

@@ -6,7 +6,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -25,9 +24,6 @@ import com.callerq.helpers.PreferencesHelper;
 import com.callerq.services.ScheduleService;
 import com.callerq.utils.NetworkUtilities;
 import com.callerq.utils.RequestCodes;
-import com.google.android.gms.auth.GoogleAuthException;
-import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -41,7 +37,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import java.io.IOException;
 
 public class StartActivity extends CallerqActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -49,14 +44,39 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
     private static final int RC_SIGN_IN = 9001;
     private static final int UI_ANIMATION_DELAY = 300;
     private final Handler mHideHandler = new Handler();
+    private final Runnable mHideRunnable = new Runnable() {
+        @Override
+        public void run() {
+            // Hide UI first
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.hide();
+            }
+
+            // Schedule a runnable to remove the status and navigation bar after a delay
+            mHideHandler.postDelayed(mHidePartRunnable, UI_ANIMATION_DELAY);
+        }
+    };
+    @Inject
+    ScheduleService scheduleService;
     private View mContentView;
+    // Runnable for hiding the status and navigation bar
+    private final Runnable mHidePartRunnable = new Runnable() {
+        @SuppressLint("InlinedApi")
+        @Override
+        public void run() {
+            mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+        }
+    };
     private GoogleApiClient mGoogleApiClient;
     private GoogleSignInResult result;
     private Button signInButton;
     private Boolean doneLoading = false;
-
-    @Inject
-    ScheduleService scheduleService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +87,7 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
                 .requestIdToken(getString(R.string.server_client_id))
                 .requestEmail()
                 .build();
+
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
@@ -256,9 +277,9 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
         GoogleSignInAccount account = result.getSignInAccount();
 
         assert account != null;
-        String mAccountName = account.getEmail();
+        String token = account.getIdToken();
 
-        new RetrieveTokenTask().execute(mAccountName);
+        onRegister(token);
 
         Intent intent = new Intent(StartActivity.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
@@ -297,60 +318,6 @@ public class StartActivity extends CallerqActivity implements GoogleApiClient.On
         }
         return false;
     }
-
-    private class RetrieveTokenTask extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected String doInBackground(String... params) {
-            String accountName = params[0];
-            String scopes = "audience:server:client_id:23254426898-ss5vhi3gvfma9577tfjdjj59tsauq97l.apps.googleusercontent.com";
-            String token = null;
-            try {
-                token = GoogleAuthUtil.getToken(getApplicationContext(), accountName, scopes);
-            } catch (IOException e) {
-                Log.e(TAG, e.getMessage());
-            } catch (UserRecoverableAuthException e) {
-                startActivityForResult(e.getIntent(), 55664);
-            } catch (GoogleAuthException e) {
-                Log.e(TAG, e.getMessage());
-            }
-            return token;
-        }
-
-        @Override
-        protected void onPostExecute(String token) {
-            super.onPostExecute(token);
-            onRegister(token);
-        }
-    }
-
-    // Runnable for hiding the status and navigation bar
-    private final Runnable mHidePartRunnable = new Runnable() {
-        @SuppressLint("InlinedApi")
-        @Override
-        public void run() {
-            mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-        }
-    };
-
-    private final Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            // Hide UI first
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.hide();
-            }
-
-            // Schedule a runnable to remove the status and navigation bar after a delay
-            mHideHandler.postDelayed(mHidePartRunnable, UI_ANIMATION_DELAY);
-        }
-    };
 
     private void delayedHide(int delayMillis) {
         mHideHandler.removeCallbacks(mHideRunnable);

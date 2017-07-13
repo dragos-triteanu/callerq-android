@@ -1,11 +1,11 @@
 package com.callerq.utils;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.util.Log;
+import com.callerq.helpers.PreferencesHelper;
+import com.callerq.models.Reminder;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -24,169 +24,171 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.util.Log;
-
-import com.callerq.models.Reminder;
-import com.callerq.helpers.PreferencesHelper;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 /**
  * Provides utility methods for communicating with the server.
  */
 final public class NetworkUtilities {
 
-	/** The tag used to log to adb console. */
-	private static final String TAG = "NetworkUtilities";
+    /**
+     * Timeout (in ms) we specify for each http request
+     */
+    private static final int HTTP_REQUEST_TIMEOUT_MS = 90 * 1000;
+    private static final String URL_BASE = "https://api.callerq.com:8001/mobile";
+    private static final String POST_REMINDERS_SUFFIX = "/reminders";
+    private static final String REGISTER_SUFFIX = "/register";
+    /**
+     * The tag used to log to adb console.
+     */
+    private static final String TAG = "NetworkUtilities";
 
-	/** Timeout (in ms) we specify for each http request */
-	public static final int HTTP_REQUEST_TIMEOUT_MS = 90 * 1000;
+    private NetworkUtilities() {
+    }
 
-	public static final String URL_BASE = "https://api.callerq.com:8001/mobile";
-	public static final String POST_REMINDERS_SUFFIX = "/reminders";
-	public static final String REGISTER_SUFFIX = "/register";
+    /**
+     * Configures the httpClient to connect to the URL provided.
+     */
+    private static HttpClient getHttpClient() {
+        HttpClient httpClient;
+        try {
 
-	private NetworkUtilities() {
-	}
+            HttpParams params = new BasicHttpParams();
+            HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
+            HttpProtocolParams.setContentCharset(params, HTTP.UTF_8);
 
-	/**
-	 * Configures the httpClient to connect to the URL provided.
-	 */
-	private static HttpClient getHttpClient() {
-		HttpClient httpClient = null;
-		try {
+            httpClient = new DefaultHttpClient(params);
+        } catch (Exception e) {
+            httpClient = new DefaultHttpClient();
+        }
+        final HttpParams params = httpClient.getParams();
+        HttpConnectionParams.setConnectionTimeout(params, HTTP_REQUEST_TIMEOUT_MS);
+        HttpConnectionParams.setSoTimeout(params, HTTP_REQUEST_TIMEOUT_MS);
+        ConnManagerParams.setTimeout(params, HTTP_REQUEST_TIMEOUT_MS);
+        return httpClient;
+    }
 
-			HttpParams params = new BasicHttpParams();
-			HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-			HttpProtocolParams.setContentCharset(params, HTTP.UTF_8);
+    public static String register(String token) {
+        HttpResponse resp = null;
+        HttpEntity entity = null;
+        String response = null;
 
-			httpClient = new DefaultHttpClient(params);
-		} catch (Exception e) {
-			httpClient = new DefaultHttpClient();
-		}
-		final HttpParams params = httpClient.getParams();
-		HttpConnectionParams.setConnectionTimeout(params, HTTP_REQUEST_TIMEOUT_MS);
-		HttpConnectionParams.setSoTimeout(params, HTTP_REQUEST_TIMEOUT_MS);
-		ConnManagerParams.setTimeout(params, HTTP_REQUEST_TIMEOUT_MS);
-		return httpClient;
-	}
+        JSONObject jsonContent = new JSONObject();
+        try {
+            jsonContent.put("token", token);
+        } catch (JSONException e) {
+            Log.e(TAG, "Error creating JSON content: " + e.getLocalizedMessage());
+        }
 
-	public static String register(String token) {
-		HttpResponse resp = null;
-		HttpEntity entity = null;
-		String response = null;
+        try {
+            entity = new StringEntity(jsonContent.toString(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            Log.e(TAG, "Error encoding JSON content: " + e.getLocalizedMessage());
+        }
 
-		JSONObject jsonContent = new JSONObject();
-		try {
-			jsonContent.put("token", token);
-		} catch (JSONException e) {
-			Log.e(TAG, "Error creating JSON content: " + e.getLocalizedMessage());
-		}
+        final HttpPost post = new HttpPost(URL_BASE + REGISTER_SUFFIX);
+        post.setEntity(entity);
+        post.addHeader("Content-Type", "application/json");
 
-		try {
-			entity = new StringEntity(jsonContent.toString(), "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			Log.e(TAG, "Error encoding JSON content: " + e.getLocalizedMessage());
-		}
+        try {
+            resp = getHttpClient().execute(post);
+        } catch (Exception e) {
+            Log.e(TAG, "Error executing post: " + e.getLocalizedMessage());
+        }
 
-		final HttpPost post = new HttpPost(URL_BASE + REGISTER_SUFFIX);
-		post.setEntity(entity);
-		post.addHeader("Content-Type", "application/json");
+        int responseStatusCode = 0;
+        try {
+            assert resp != null;
+            responseStatusCode = resp.getStatusLine().getStatusCode();
+        } catch (Exception e) {
+            Log.e(TAG, "Error reading response code: " + e.getLocalizedMessage());
+        }
 
-		try {
-			resp = getHttpClient().execute(post);
-		} catch (Exception e) {
-			Log.e(TAG, "Error executing post: " + e.getLocalizedMessage());
-		}
+        if (responseStatusCode == HttpStatus.SC_OK) {
+            try {
+                InputStream istream = (resp.getEntity() != null) ? resp.getEntity().getContent()
+                        : null;
+                if (istream != null) {
+                    BufferedReader ireader = new BufferedReader(new InputStreamReader(istream));
+                    response = ireader.readLine().trim();
+                    ireader.close();
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error reading response: " + e.getLocalizedMessage());
+            }
+        }
 
-		int responseStatusCode = 0;
-		try {
-			responseStatusCode = resp.getStatusLine().getStatusCode();
-		} catch (Exception e) {
-			Log.e(TAG, "Error reading response code: " + e.getLocalizedMessage());
-		}
+        return response;
+    }
 
-		if (responseStatusCode == HttpStatus.SC_OK) {
-			try {
-				InputStream istream = (resp.getEntity() != null) ? resp.getEntity().getContent()
-						: null;
-				if (istream != null) {
-					BufferedReader ireader = new BufferedReader(new InputStreamReader(istream));
-					response = ireader.readLine().trim();
-					ireader.close();
-				}
-			} catch (Exception e) {
-				Log.e(TAG, "Error reading response: " + e.getLocalizedMessage());
-			}
-		}
+    public static String postReminders(Context context, List<Reminder> reminders) {
+        HttpResponse resp = null;
+        HttpEntity entity = null;
+        String response = null;
 
-		return response;
-	}
+        JSONObject jsonContent = new JSONObject();
+        try {
+            String loginToken = PreferencesHelper.getLoginToken(context);
+            if (loginToken == null)
+                return null;
 
-	public static String postReminders(Context context, List<Reminder> reminders) {
-		HttpResponse resp = null;
-		HttpEntity entity = null;
-		String response = null;
+            jsonContent.put("token", loginToken);
 
-		JSONObject jsonContent = new JSONObject();
-		try {
-			String loginToken = PreferencesHelper.getLoginToken(context);
-			if (loginToken == null)
-				return null;
+            JSONArray jsonReminders = new JSONArray();
+            for (Reminder r : reminders) {
+                JSONObject jsonReminder = r.toJSONObject();
+                if (jsonReminder != null) {
+                    jsonReminders.put(jsonReminder);
+                }
+            }
+            jsonContent.put("reminders", jsonReminders);
+        } catch (JSONException e) {
+            Log.e(TAG, "Error creating JSON content: " + e.getLocalizedMessage());
+        }
 
-			jsonContent.put("token", loginToken);
+        try {
+            entity = new StringEntity(jsonContent.toString(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            Log.e(TAG, "Error encoding JSON content: " + e.getLocalizedMessage());
+        }
 
-			JSONArray jsonReminders = new JSONArray();
-			for (Reminder r : reminders) {
-				JSONObject jsonReminder = r.toJSONObject();
-				if (jsonReminder != null) {
-					jsonReminders.put(jsonReminder);
-				}
-			}
-			jsonContent.put("reminders", jsonReminders);
-		} catch (JSONException e) {
-			Log.e(TAG, "Error creating JSON content: " + e.getLocalizedMessage());
-		}
+        final HttpPost post = new HttpPost(URL_BASE + POST_REMINDERS_SUFFIX);
+        post.setEntity(entity);
+        post.addHeader("Content-Type", "application/json");
 
-		try {
-			entity = new StringEntity(jsonContent.toString(), "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			Log.e(TAG, "Error encoding JSON content: " + e.getLocalizedMessage());
-		}
+        try {
+            resp = getHttpClient().execute(post);
+        } catch (Exception e) {
+            Log.e(TAG, "Error executing post: " + e.getLocalizedMessage());
+        }
 
-		final HttpPost post = new HttpPost(URL_BASE + POST_REMINDERS_SUFFIX);
-		post.setEntity(entity);
-		post.addHeader("Content-Type", "application/json");
+        assert resp != null;
+        if (resp.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            try {
+                InputStream istream = (resp.getEntity() != null) ? resp.getEntity().getContent()
+                        : null;
+                if (istream != null) {
+                    BufferedReader ireader = new BufferedReader(new InputStreamReader(istream));
+                    response = ireader.readLine().trim();
+                    ireader.close();
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error reading response: " + e.getLocalizedMessage());
+            }
+        }
 
-		try {
-			resp = getHttpClient().execute(post);
-		} catch (Exception e) {
-			Log.e(TAG, "Error executing post: " + e.getLocalizedMessage());
-		}
+        return response;
+    }
 
-		if (resp.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-			try {
-				InputStream istream = (resp.getEntity() != null) ? resp.getEntity().getContent()
-						: null;
-				if (istream != null) {
-					BufferedReader ireader = new BufferedReader(new InputStreamReader(istream));
-					response = ireader.readLine().trim();
-					ireader.close();
-				}
-			} catch (Exception e) {
-				Log.e(TAG, "Error reading response: " + e.getLocalizedMessage());
-			}
-		}
-
-		return response;
-	}
-
-	public static boolean hasDataConnectivity(Context context) {
-		ConnectivityManager connMgr = (ConnectivityManager) context
-				.getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-		return networkInfo != null && networkInfo.isConnected();
-	}
+    public static boolean hasDataConnectivity(Context context) {
+        ConnectivityManager connMgr = (ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
+    }
 
 }

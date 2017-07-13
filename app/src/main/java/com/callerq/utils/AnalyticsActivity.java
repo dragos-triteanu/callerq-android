@@ -1,10 +1,12 @@
 package com.callerq.utils;
 
+import android.support.v4.app.FragmentActivity;
 import com.callerq.helpers.PreferencesHelper;
 
-import android.support.v4.app.FragmentActivity;
-
 public class AnalyticsActivity extends FragmentActivity {
+
+    // TODO: maybe implement this
+
     @Override
     protected void onStart() {
         super.onStart();

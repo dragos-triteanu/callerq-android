@@ -6,11 +6,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.util.Log;
-import android.widget.Toast;
 import com.callerq.models.Reminder;
 import com.callerq.services.DatabaseService;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -25,15 +23,7 @@ public class DatabaseHelper {
 
     private Context activityContext;
 
-    // class for event listeners for DatabaseHelper events
-    public static interface DatabaseListener {
-
-        public void savedReminder(String requestId);
-        public void gotReminders(ArrayList<Reminder> reminders);
-
-    }
-
-    protected DatabaseHelper() {
+    private DatabaseHelper() {
     }
 
     public static synchronized DatabaseHelper getInstance() {
@@ -62,7 +52,6 @@ public class DatabaseHelper {
         remindersIntent.setData(Uri.fromParts(DatabaseService.URI_SCHEME, requestId, null));
         context.startService(remindersIntent);
 
-        // TODO: Try to return the reminders to the RemindersFragment
         return requestId;
     }
 
@@ -78,7 +67,26 @@ public class DatabaseHelper {
         msgIntent.putExtra(DatabaseService.PARAM_REMINDER, reminder);
         msgIntent.setData(Uri.fromParts(DatabaseService.URI_SCHEME, requestId, null));
         context.startService(msgIntent);
+
         return requestId;
+    }
+
+    private void registerReceiver(Context context, String action) {
+        Context appContext = context.getApplicationContext();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(action);
+        filter.addDataScheme(DatabaseService.URI_SCHEME);
+        DatabaseServiceReceiver receiver = new DatabaseServiceReceiver(appContext);
+        appContext.registerReceiver(receiver, filter);
+    }
+
+    // class for event listeners for DatabaseHelper events
+    public interface DatabaseListener {
+
+        void savedReminder(String requestId);
+
+        void gotReminders(ArrayList<Reminder> reminders);
+
     }
 
     public class DatabaseServiceReceiver extends BroadcastReceiver {
@@ -110,20 +118,11 @@ public class DatabaseHelper {
             // if the activity context still exists, unregister the receiver
             try {
                 broadcastContext.unregisterReceiver(this);
-            } catch (Exception e) {
-                ;
+            } catch (Exception ignored) {
+
             }
         }
 
-    }
-
-    private void registerReceiver(Context context, String action) {
-        Context appContext = context.getApplicationContext();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(action);
-        filter.addDataScheme(DatabaseService.URI_SCHEME);
-        DatabaseServiceReceiver receiver = new DatabaseServiceReceiver(appContext);
-        appContext.registerReceiver(receiver, filter);
     }
 
 }

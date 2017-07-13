@@ -27,11 +27,9 @@ public class CallBroadcastReceiver extends BroadcastReceiver implements AddressB
     private static Calendar callStartedTime;
     private static Calendar callStopTime;
     private static String getContactRequestId;
-
-    private Context context;
-
     @Inject
     ScheduleService schedulingService;
+    private Context context;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -62,7 +60,6 @@ public class CallBroadcastReceiver extends BroadcastReceiver implements AddressB
 
                     // check if the phone number is not on the ignore list
                     if (!PreferencesHelper.isPhoneNumberIgnored(context, phoneNumber)) {
-                        // TODO: retrieve contact data based on phone number
                         AddressBookHelper addressBookHelper = AddressBookHelper.getInstance();
                         getContactRequestId = addressBookHelper.getContact(context, phoneNumber);
                     }
@@ -88,9 +85,9 @@ public class CallBroadcastReceiver extends BroadcastReceiver implements AddressB
             } else {
                 contactName = "";
             }
+            // TODO: check why this method is triggered 3 times
+            schedulingService.sendNotificationAfterCall(context, new CallDetails(contactName, phoneNumber, callStartedTime, callStopTime));
         }
 
-        // launch the re-schedule activity
-        schedulingService.sendNotificationAfterCall(context, new CallDetails(contactName, phoneNumber, callStartedTime, callStopTime));
     }
 }

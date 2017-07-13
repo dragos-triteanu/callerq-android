@@ -1,13 +1,7 @@
 package com.callerq.helpers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import android.Manifest;
 import android.content.ContentProviderOperation;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -19,10 +13,11 @@ import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.RawContacts;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
-import com.callerq.activities.RescheduleActivity;
-import com.callerq.utils.RequestCodes;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class AddressBookHelper {
 
@@ -30,23 +25,9 @@ public class AddressBookHelper {
 
     private static AddressBookHelper instance;
 
-    private static List<AddressBookListener> listeners = new ArrayList<AddressBookListener>();
+    private static List<AddressBookListener> listeners = new ArrayList<>();
 
-    // class for event listeners for DatabaseHelper events
-    public static interface AddressBookListener {
-
-        void contactRetrieved(String requestId, Contact contact);
-
-    }
-
-    public static class Contact {
-        public String name;
-        public String company;
-        public String email;
-        public List<String> phoneNumbers;
-    }
-    
-    protected AddressBookHelper() {
+    private AddressBookHelper() {
     }
 
     public static AddressBookHelper getInstance() {
@@ -75,18 +56,32 @@ public class AddressBookHelper {
         return requestId;
     }
 
-    public static class AddContactTask extends
+    // class for event listeners for DatabaseHelper events
+    public interface AddressBookListener {
+
+        void contactRetrieved(String requestId, Contact contact);
+
+    }
+
+    public static class Contact {
+        public String name;
+        public String company;
+        public String email;
+        public List<String> phoneNumbers;
+    }
+
+    private static class AddContactTask extends
             AsyncTask<Contact, Integer, Boolean> {
 
         private Context context;
 
-        public AddContactTask(Context context) {
+        private AddContactTask(Context context) {
             this.context = context;
         }
 
         protected Boolean doInBackground(Contact... args) {
             Contact contact = args[0];
-            ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+            ArrayList<ContentProviderOperation> ops = new ArrayList<>();
             int rawContactInsertIndex = ops.size();
 
             ops.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
@@ -128,13 +123,13 @@ public class AddressBookHelper {
 
     }
 
-    public static class GetContactTask extends
+    private static class GetContactTask extends
             AsyncTask<String, Integer, Contact> {
 
         private Context context;
         private String requestId;
 
-        public GetContactTask(Context context, String requestId) {
+        private GetContactTask(Context context, String requestId) {
             this.context = context;
             this.requestId = requestId;
         }
@@ -149,10 +144,11 @@ public class AddressBookHelper {
                     Uri.encode(phoneNumber));
 
             Cursor people = context.getContentResolver().query(uri,
-                    new String[] { PhoneLookup._ID, PhoneLookup.DISPLAY_NAME },
+                    new String[]{PhoneLookup._ID, PhoneLookup.DISPLAY_NAME},
                     null, null, null);
-            String contactDisplayName = null;
-            String contactId = null;
+            String contactDisplayName;
+            String contactId;
+            assert people != null;
             if (people.moveToFirst()) {
                 do {
                     int nameFieldColumnIndex = people
@@ -169,21 +165,22 @@ public class AddressBookHelper {
                 return null;
             }
             if (contactDisplayName == null) {
-                contactDisplayName = new String();
+                contactDisplayName = "";
             }
 
             // get contact's phone numbers
             Cursor phonesCursor = context.getContentResolver().query(
                     Data.CONTENT_URI,
-                    new String[] { Data._ID, Phone.NUMBER, Phone.TYPE,
-                            Phone.LABEL },
+                    new String[]{Data._ID, Phone.NUMBER, Phone.TYPE,
+                            Phone.LABEL},
                     Data.CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "='"
                             + Phone.CONTENT_ITEM_TYPE + "'",
-                    new String[] { String.valueOf(contactId) }, null);
-            ArrayList<String> phoneNumbers = new ArrayList<String>();
+                    new String[]{String.valueOf(contactId)}, null);
+            ArrayList<String> phoneNumbers = new ArrayList<>();
             phoneNumbers.add(phoneNumber);
+            assert phonesCursor != null;
             if (phonesCursor.moveToFirst()) {
-                String contactPhone = new String();
+                String contactPhone;
                 do {
                     int numberFieldColumnIndex = phonesCursor
                             .getColumnIndex(Phone.NUMBER);
@@ -200,10 +197,11 @@ public class AddressBookHelper {
             String company = null;
             Cursor companyCursor = context.getContentResolver().query(
                     Data.CONTENT_URI,
-                    new String[] { Organization.COMPANY },
+                    new String[]{Organization.COMPANY},
                     Data.CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "='"
                             + Organization.CONTENT_ITEM_TYPE + "'",
-                    new String[] { String.valueOf(contactId) }, null);
+                    new String[]{String.valueOf(contactId)}, null);
+            assert companyCursor != null;
             if (companyCursor.moveToFirst()) {
                 do {
                     int companyFieldColumnIndex = companyCursor
@@ -214,17 +212,18 @@ public class AddressBookHelper {
                 companyCursor.close();
             }
             if (company == null) {
-                company = new String();
+                company = "";
             }
 
             // get the contact's email address
             String email = null;
             Cursor emailCursor = context.getContentResolver().query(
                     Data.CONTENT_URI,
-                    new String[] { Data.DATA1 },
+                    new String[]{Data.DATA1},
                     Data.CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "='"
                             + Email.CONTENT_ITEM_TYPE + "'",
-                    new String[] { String.valueOf(contactId) }, null);
+                    new String[]{String.valueOf(contactId)}, null);
+            assert emailCursor != null;
             if (emailCursor.moveToFirst()) {
                 do {
                     int emailFieldColumnIndex = emailCursor
@@ -235,9 +234,9 @@ public class AddressBookHelper {
                 emailCursor.close();
             }
             if (email == null) {
-            	email = new String();
+                email = "";
             }
-            
+
             contact.name = contactDisplayName;
             contact.phoneNumbers = phoneNumbers;
             contact.company = company;
@@ -253,7 +252,7 @@ public class AddressBookHelper {
                 listener.contactRetrieved(requestId, result);
             }
         }
-        
+
     }
 
 }
