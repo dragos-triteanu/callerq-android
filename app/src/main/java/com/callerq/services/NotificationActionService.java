@@ -68,10 +68,8 @@ public class NotificationActionService extends IntentService {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         int snoozeReminderDuration = prefs.getInt("pref_snooze_duration", 5);
 
-        // TODO: change to Calendar.MINUTE after that
-
         Calendar snoozeCalendar = Calendar.getInstance();
-        snoozeCalendar.add(Calendar.SECOND, snoozeReminderDuration);
+        snoozeCalendar.add(Calendar.MINUTE, snoozeReminderDuration);
 
         Intent scheduleIntent = new Intent(this, ScheduleService.class).setAction("scheduleNotification");
 
@@ -110,7 +108,7 @@ public class NotificationActionService extends IntentService {
         int snoozeCallDuration = prefs.getInt("pref_snooze_duration", 5);
 
         Calendar snoozeCalendar = Calendar.getInstance();
-        snoozeCalendar.add(Calendar.SECOND, snoozeCallDuration);
+        snoozeCalendar.add(Calendar.MINUTE, snoozeCallDuration);
 
         Intent reminderIntent = new Intent(this, ReminderService.class).setAction("reminderNotification");
 

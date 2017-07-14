@@ -3,6 +3,7 @@ package com.callerq.receivers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import com.callerq.CallerqApplication;
@@ -87,9 +88,14 @@ public class CallBroadcastReceiver extends BroadcastReceiver implements AddressB
             } else {
                 contactName = "";
             }
-
-            schedulingService.sendNotificationAfterCall(context, new CallDetails(contactName, phoneNumber, callStartedTime, callStopTime));
             getContactRequestId = "";
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    schedulingService.sendNotificationAfterCall(context, new CallDetails(contactName, phoneNumber, callStartedTime, callStopTime));
+                }
+            }, 500);
         }
 
     }

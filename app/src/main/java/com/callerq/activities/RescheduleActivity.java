@@ -364,12 +364,8 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_UPDATE_CURRENT);
 
         // Get the AlarmManager service
-//        AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-//        am.set(AlarmManager.RTC_WAKEUP, reminder.getScheduleDatetime(), sender);
-        Calendar currentTime = Calendar.getInstance();
-        currentTime.add(Calendar.SECOND, 5);
         AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-        am.set(AlarmManager.RTC_WAKEUP, currentTime.getTimeInMillis(), sender);
+        am.set(AlarmManager.RTC_WAKEUP, reminder.getScheduleDatetime(), sender);
     }
 
     private void setCalendarEvent(Reminder reminder) {

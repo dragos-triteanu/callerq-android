@@ -78,7 +78,7 @@ public class ScheduleService extends IntentService {
             notificationBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
         }
         if (prefs.getBoolean("pref_alert_vibrate", true)) {
-            notificationBuilder.setVibrate(new long[]{1000, 1000, 1000});
+            notificationBuilder.setVibrate(new long[]{1000, 1000});
         }
 
         notificationBuilder.addAction(0, "Snooze", cancelPendingIntent);
