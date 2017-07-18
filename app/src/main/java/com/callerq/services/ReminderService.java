@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.NotificationCompat;
@@ -34,8 +35,10 @@ public class ReminderService extends IntentService {
         String action = intent.getAction();
         Bundle extras = intent.getBundleExtra("reminderBundle");
         Reminder reminder = extras.getParcelable(REMINDER);
+        Uri eventUri = intent.getParcelableExtra("eventUri");
         if (action.equals("reminderNotification")) {
             showReminderNotification(this, reminder);
+            getContentResolver().delete(eventUri, null, null);
         }
     }
 

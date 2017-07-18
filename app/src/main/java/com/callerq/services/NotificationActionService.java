@@ -90,6 +90,7 @@ public class NotificationActionService extends IntentService {
             // perform the call
             Intent callIntent = new Intent(Intent.ACTION_CALL);
             callIntent.setData(Uri.fromParts("tel", reminder.getContactPhones().get(0), null));
+            callIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(new RescheduleActivity(),
                         new String[]{Manifest.permission.CALL_PHONE},

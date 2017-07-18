@@ -21,6 +21,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.telephony.PhoneNumberUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -113,6 +114,8 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
 
     private String eventTitle;
 
+    private Uri eventUri;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -176,6 +179,14 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         reminder.setContactCompany(contact.company);
         reminder.setContactPhones(contact.phoneNumbers);
         reminder.setContactEmail(contact.email);
+
+        // set up the event title
+        if (reminder.isMeeting()) {
+            eventTitle = getString(R.string.calendar_event_title_meeting);
+        } else {
+            eventTitle = getString(R.string.calendar_event_title_call);
+        }
+        eventTitle += " " + reminder.getContactName();
 
         setCalendarEvent(reminder);
 
@@ -347,6 +358,7 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         bundle.putParcelable(ReminderService.REMINDER, reminder);
 
         intent.putExtra("reminderBundle", bundle);
+        intent.putExtra("eventUri", eventUri);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.setAction("reminderNotification");
 
@@ -380,13 +392,13 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         Account googleAccount = getFirstGoogleAccount();
         if (googleAccount == null) {
             Toast.makeText(this, "There is no Google account set up on the device.", Toast.LENGTH_LONG).show();
-            finish();
+            return;
         }
 
         Long calendarId = getFirstCalendarId(googleAccount);
         if (calendarId == null) {
             Toast.makeText(this, "No calendar was found on the Google account.", Toast.LENGTH_LONG).show();
-            finish();
+            return;
         }
 
         // calculate the start end end time
@@ -400,14 +412,6 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         }
         long endMillis = endTime.getTimeInMillis();
 
-        // set up the event title
-        if (reminder.isMeeting()) {
-            eventTitle = getString(R.string.calendar_event_title_meeting);
-        } else {
-            eventTitle = getString(R.string.calendar_event_title_call);
-        }
-        eventTitle += " " + reminder.getContactName();
-
         ContentResolver cr = getContentResolver();
         ContentValues values = new ContentValues();
         values.put(CalendarContract.Events.DTSTART, startMillis);
@@ -415,10 +419,10 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         values.put(CalendarContract.Events.TITLE, eventTitle);
         values.put(CalendarContract.Events.DESCRIPTION, reminder.getMemoText());
         values.put(CalendarContract.Events.CALENDAR_ID, calendarId);
+        values.put(CalendarContract.Events.HAS_ALARM, 0);
         values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().getID());
 
-        cr.insert(CalendarContract.Events.CONTENT_URI, values);
-
+        eventUri = cr.insert(CalendarContract.Events.CONTENT_URI, values);
     }
 
     private Account getFirstGoogleAccount() {
@@ -468,9 +472,7 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
                 android.R.layout.simple_spinner_dropdown_item, dateArray);
 
         dateInput.setAdapter(dateArrayAdapter);
-        dateInput.setText(dateArray[1]);
-        setCalendar.set(Calendar.DAY_OF_YEAR, Calendar.getInstance().get(Calendar.DAY_OF_YEAR));
-        setCalendar.add(Calendar.DAY_OF_YEAR, 1);
+        dateInput.setText(dateArray[0]);
 
         dateInput.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -479,18 +481,19 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
 
                 if (itemClicked != 2) {
                     setCalendar.set(Calendar.YEAR, currentTime.get(Calendar.YEAR));
-                    setCalendar.set(Calendar.DAY_OF_YEAR, currentTime.get(Calendar.DAY_OF_YEAR));
+                    setCalendar.set(Calendar.MONTH, currentTime.get(Calendar.MONTH));
+                    setCalendar.set(Calendar.DATE, currentTime.get(Calendar.DATE));
                 }
 
                 switch (itemClicked) {
                     case 0:
                         break;
                     case 1:
-                        setCalendar.add(Calendar.DAY_OF_YEAR, 1);
+                        setCalendar.add(Calendar.DATE, 1);
                         break;
                     case 2:
                         DatePickerDialog datePickerDialog = new DatePickerDialog(RescheduleActivity.this, RescheduleActivity.this,
-                                setCalendar.get(Calendar.YEAR), setCalendar.get(Calendar.MONTH), setCalendar.get(Calendar.DAY_OF_MONTH));
+                                setCalendar.get(Calendar.YEAR), setCalendar.get(Calendar.MONTH), setCalendar.get(Calendar.DATE));
                         datePickerDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                             @Override
                             public void onCancel(DialogInterface dialogInterface) {
@@ -516,15 +519,19 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
                 android.R.layout.simple_spinner_dropdown_item, timeArray);
 
         timeInput.setAdapter(timeArrayAdapter);
-        timeInput.setText(timeArray[0]);
+
+        setCalendar.add(Calendar.MINUTE, 60);
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.US);
+        timeInput.setText(simpleDateFormat.format(setCalendar.getTime()));
+
+        if (!DateUtils.isToday(setCalendar.getTimeInMillis())) {
+            dateInput.setText(dateArray[1]);
+        }
 
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(RescheduleActivity.this);
 
         final Calendar prefTimes = Calendar.getInstance();
-        prefTimes.setTimeInMillis(prefs.getLong("pref_morning_time", 28800000));
-
-        setCalendar.set(Calendar.HOUR_OF_DAY, prefTimes.get(Calendar.HOUR_OF_DAY));
-        setCalendar.set(Calendar.MINUTE, prefTimes.get(Calendar.MINUTE));
 
         timeInput.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -585,8 +592,10 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
             Calendar currentCalendar = Calendar.getInstance();
             int today = currentCalendar.get(Calendar.DAY_OF_YEAR);
 
-            currentCalendar.add(Calendar.DAY_OF_YEAR, 1);
+            currentCalendar.add(Calendar.DATE, 1);
             int tomorrow = currentCalendar.get(Calendar.DAY_OF_YEAR);
+
+            // TODO: Solve new year problem
 
             if (setCalendar.get(Calendar.YEAR) == currentCalendar.get(Calendar.YEAR)) {
                 if (setCalendar.get(Calendar.DAY_OF_YEAR) == today) {
@@ -653,7 +662,11 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
     private void validateDateAndTime() {
         Calendar currentTime = Calendar.getInstance();
         Calendar yesterday = Calendar.getInstance();
-        yesterday.add(Calendar.DAY_OF_YEAR, -1);
+        yesterday.set(Calendar.HOUR, 0);
+        yesterday.set(Calendar.MINUTE, 0);
+        yesterday.set(Calendar.SECOND, 0);
+
+        // TODO: check why sometimes "today is in the past" at 00:00
 
         String dateText = dateInput.getText().toString().replace(" is in the past", "");
         String dateError = dateText + " is in the past";

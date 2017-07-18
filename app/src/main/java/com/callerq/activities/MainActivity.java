@@ -353,21 +353,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             SimpleDateFormat simpleDateFormat;
             Calendar currentCalendar = Calendar.getInstance();
-            int today = currentCalendar.get(Calendar.DAY_OF_YEAR);
+            int today = currentCalendar.get(Calendar.DATE);
 
-            currentCalendar.add(Calendar.DAY_OF_YEAR, 1);
-            int tomorrow = currentCalendar.get(Calendar.DAY_OF_YEAR);
+            currentCalendar.add(Calendar.DATE, 1);
+            int tomorrow = currentCalendar.get(Calendar.DATE);
 
             Calendar scheduledCalendar = Calendar.getInstance();
             scheduledCalendar.setTimeInMillis(reminder.getScheduleDatetime());
 
+            // TODO: if there's any problems, replace DATE by DAY_OF_YEAR back how it was
+
             String dateTimeText = "";
 
             if (scheduledCalendar.get(Calendar.YEAR) == currentCalendar.get(Calendar.YEAR)) {
-                if (scheduledCalendar.get(Calendar.DAY_OF_YEAR) == today) {
+                if (scheduledCalendar.get(Calendar.DATE) == today) {
                     simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.US);
                     dateTimeText = "Today, ";
-                } else if (scheduledCalendar.get(Calendar.DAY_OF_YEAR) == tomorrow) {
+                } else if (scheduledCalendar.get(Calendar.DATE) == tomorrow) {
                     simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.US);
                     dateTimeText = "Tomorrow, ";
                 } else {
