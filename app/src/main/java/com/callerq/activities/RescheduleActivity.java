@@ -419,7 +419,7 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         values.put(CalendarContract.Events.TITLE, eventTitle);
         values.put(CalendarContract.Events.DESCRIPTION, reminder.getMemoText());
         values.put(CalendarContract.Events.CALENDAR_ID, calendarId);
-        values.put(CalendarContract.Events.HAS_ALARM, 0);
+        values.put(CalendarContract.Events.HAS_ALARM, false);
         values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().getID());
 
         eventUri = cr.insert(CalendarContract.Events.CONTENT_URI, values);
@@ -520,7 +520,9 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
 
         timeInput.setAdapter(timeArrayAdapter);
 
-        setCalendar.add(Calendar.MINUTE, 60);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        int initialTime = prefs.getInt("pref_initial_time_amount", 60);
+        setCalendar.add(Calendar.MINUTE, initialTime);
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.US);
         timeInput.setText(simpleDateFormat.format(setCalendar.getTime()));
@@ -528,8 +530,6 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         if (!DateUtils.isToday(setCalendar.getTimeInMillis())) {
             dateInput.setText(dateArray[1]);
         }
-
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(RescheduleActivity.this);
 
         final Calendar prefTimes = Calendar.getInstance();
 
@@ -662,9 +662,10 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
     private void validateDateAndTime() {
         Calendar currentTime = Calendar.getInstance();
         Calendar yesterday = Calendar.getInstance();
-        yesterday.set(Calendar.HOUR, 0);
-        yesterday.set(Calendar.MINUTE, 0);
-        yesterday.set(Calendar.SECOND, 0);
+        yesterday.add(Calendar.DATE, -1);
+        yesterday.set(Calendar.HOUR_OF_DAY, 23);
+        yesterday.set(Calendar.MINUTE, 59);
+        yesterday.set(Calendar.SECOND, 59);
 
         // TODO: check why sometimes "today is in the past" at 00:00
 

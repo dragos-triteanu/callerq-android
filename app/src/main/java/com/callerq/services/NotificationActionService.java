@@ -16,7 +16,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
-import com.callerq.CallerqApplication;
 import com.callerq.activities.RescheduleActivity;
 import com.callerq.models.CallDetails;
 import com.callerq.models.Reminder;
@@ -35,7 +34,6 @@ public class NotificationActionService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        CallerqApplication.APP.inject(this);
     }
 
     @Override
