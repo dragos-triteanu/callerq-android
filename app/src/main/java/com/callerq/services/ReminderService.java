@@ -38,7 +38,9 @@ public class ReminderService extends IntentService {
         Uri eventUri = intent.getParcelableExtra("eventUri");
         if (action.equals("reminderNotification")) {
             showReminderNotification(this, reminder);
-            getContentResolver().delete(eventUri, null, null);
+            if (eventUri != null) {
+                getContentResolver().delete(eventUri, null, null);
+            }
         }
     }
 
