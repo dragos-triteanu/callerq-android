@@ -1,49 +1,39 @@
 {
   "project_info": {
-    "project_number": "23254426898",
-    "project_id": "callrescheduler.com:api-project-23254426898"
+    "project_number": "634453826624",
+    "firebase_url": "https://callerq-526ce.firebaseio.com",
+    "project_id": "callerq-526ce",
+    "storage_bucket": "callerq-526ce.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:23254426898:android:0bd7b3b69d1ff002",
+        "mobilesdk_app_id": "1:634453826624:android:60752af778751233",
         "android_client_info": {
-          "package_name": "com.callerq"
+          "package_name": "com.callrq"
         }
       },
       "oauth_client": [
         {
-          "client_id": "23254426898-cj87ht703ahpta756oplm409e2r8qnut.apps.googleusercontent.com",
+          "client_id": "634453826624-ds3c68beb8o5ntljhftebgcfblnucbne.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.callerq",
-            "certificate_hash": "2da7fc9ab6f24b452521e2cda2afdd1c9cefb861"
+            "package_name": "com.callrq",
+            "certificate_hash": "373f6ac468f4b836def148a82ad3077a44342a4f"
           }
         },
         {
-          "client_id": "23254426898-jqo4ssqbqge9ngrtbcscnas1and9j720.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.callerq",
-            "certificate_hash": "9460222d986b57072c995df7101400af3f6ba6e7"
-          }
-        },
-        {
-          "client_id": "23254426898-ss5vhi3gvfma9577tfjdjj59tsauq97l.apps.googleusercontent.com",
+          "client_id": "634453826624-rmg92lc2bm7fke5js1c32nbtb4r5s92j.apps.googleusercontent.com",
           "client_type": 3
         },
         {
-          "client_id": "23254426898.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.callerq",
-            "certificate_hash": "be8bb3c51912a13181363301f82caf8e48cea2c8"
-          }
+          "client_id": "634453826624-ljd5peq19rj0cdma80fijofvq5chd181.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBtOe4XP8XMHuSUIe7fJ_KkSI5TLKcEwy4"
+          "current_key": "AIzaSyChSKAms6u9vFvnsot6JuQHn6L-gY-yoFs"
         }
       ],
       "services": {
@@ -51,11 +41,16 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "634453826624-rmg92lc2bm7fke5js1c32nbtb4r5s92j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
-          "status": 1
+          "status": 2
         }
       }
     }

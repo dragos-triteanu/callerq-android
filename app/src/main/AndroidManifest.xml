@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
-          package="com.callerq">
+          package="com.callrq">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -17,7 +17,7 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
-        android:name=".CallerqApplication"
+        android:name="com.callrq.CallerqApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_logo"
         android:label="@string/app_name"
@@ -26,7 +26,7 @@
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
         <activity
-            android:name=".activities.StartActivity"
+            android:name="com.callrq.activities.IntroActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait"
             android:theme="@style/FullscreenTheme">
@@ -37,25 +37,25 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.MainActivity"
+            android:name="com.callrq.activities.MainActivity"
             android:label="@string/main_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name=".activities.AboutActivity"
+            android:name="com.callrq.activities.AboutActivity"
             android:label="@string/about_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name=".activities.SettingsActivity"
+            android:name="com.callrq.activities.SettingsActivity"
             android:label="@string/settings_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name=".activities.RescheduleActivity"
+            android:name="com.callrq.activities.RescheduleActivity"
             android:allowTaskReparenting="true"
             android:excludeFromRecents="true"
             android:label="@string/reschedule_name"
@@ -66,7 +66,7 @@
         </activity>
 
         <receiver
-            android:name=".receivers.CallBroadcastReceiver"
+            android:name="com.callrq.receivers.CallBroadcastReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE"/>
@@ -77,18 +77,18 @@
         </receiver>
 
         <service
-            android:name=".services.NotificationActionService"
+            android:name="com.callrq.services.NotificationActionService"
             android:exported="false"/>
         <service
-            android:name=".services.DatabaseService"
+            android:name="com.callrq.services.DatabaseService"
             android:exported="false">
         </service>
         <service
-            android:name=".services.ReminderService"
+            android:name="com.callrq.services.ReminderService"
             android:exported="false">
         </service>
         <service
-            android:name=".services.ScheduleService"
+            android:name="com.callrq.services.ScheduleService"
             android:exported="false">
         </service>
     </application>
