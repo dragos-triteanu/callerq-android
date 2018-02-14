@@ -78,8 +78,8 @@
             style="@style/LoginButton"
             android:layout_width="196dp"
             android:layout_height="wrap_content"
-            android:gravity="left"
-            android:textAlignment="center" />
+            android:textAlignment="center" >
+        </com.google.android.gms.common.SignInButton>
 
 
         <com.facebook.login.widget.LoginButton

@@ -44,6 +44,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.crash.FirebaseCrash;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -154,13 +155,16 @@ public class IntroActivity extends AppCompatActivity implements GoogleApiClient.
             @Override
             public void onCancel() {
                 Log.d(TAG, "facebook:onCancel");
+                loadingIndicator.setVisibility(View.INVISIBLE);
                 showAuthButtons();
+
             }
 
             @Override
             public void onError(FacebookException error) {
                 Log.d(TAG, "facebook:onError", error);
                 showAuthButtons();
+                loadingIndicator.setVisibility(View.INVISIBLE);
                 Snackbar.make(mContentView, getString(R.string.authentication_failed), Snackbar.LENGTH_SHORT).show();
             }
         });
@@ -207,17 +211,15 @@ public class IntroActivity extends AppCompatActivity implements GoogleApiClient.
                             try {
                                 throw task.getException();
                             } catch (FirebaseAuthUserCollisionException e) {
-                                Log.e(TAG, "firebaseAuthWithFacebook:: Account login colission", e);
                                 if (e.getErrorCode().equals("ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL")) {
-
+                                    FirebaseCrash.logcat(Log.ERROR, TAG, "Facebook account collision");
+                                    FirebaseCrash.report(e);
+                                    showAuthButtons();
                                 }
                             } catch (Exception e) {
-                                Log.e(TAG, "firebaseAuthWithFacebook:: Error while facebook login", e);
+                                FirebaseCrash.logcat(Log.ERROR, TAG, "firebaseAuthWithFacebook:: Error while facebook login");
+                                FirebaseCrash.report(e);
                             }
-
-
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "signInWithCredential:failure", task.getException());
                             Snackbar.make(findViewById(R.id.fullscreen_content), getString(R.string.authentication_failed), Snackbar.LENGTH_SHORT).show();
                         }
                     }
@@ -262,7 +264,8 @@ public class IntroActivity extends AppCompatActivity implements GoogleApiClient.
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
                 authContainer.setVisibility(View.VISIBLE);
-                Log.w(TAG, "Google sign in failed", e);
+                FirebaseCrash.logcat(Log.ERROR, TAG, "Google sign in failed");
+                FirebaseCrash.report(e);
             }
         } else {
             mCallbackManager.onActivityResult(requestCode, resultCode, data);
@@ -373,6 +376,7 @@ public class IntroActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void showAuthButtons() {
+        loadingIndicator.setVisibility(View.INVISIBLE);
         authContainer.setVisibility(View.VISIBLE);
     }
 

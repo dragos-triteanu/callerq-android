@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
 
 android {
     compileSdkVersion 26
@@ -43,11 +44,18 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
 
     //Firebase + auth
+    compile 'com.google.firebase:firebase-core:11.8.0'
     implementation 'com.google.firebase:firebase-auth:11.8.0'
+    implementation 'com.google.firebase:firebase-crash:11.8.0'
 
     //Play Services
     compile 'com.google.android.gms:play-services-auth:11.8.0'
     compile 'com.google.android.gms:play-services-analytics:11.8.0'
+
+    //Crashlythics
+    compile('com.crashlytics.sdk.android:crashlytics:2.9.0@aar') {
+        transitive = true
+    }
 
     //DI
     compile 'com.google.dagger:dagger:2.11'
@@ -62,6 +70,7 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC1'
 
 }
+
 
 
 
