@@ -39,9 +39,12 @@ import com.callrq.fragments.RemindersFragment;
 import com.callrq.helpers.DatabaseHelper;
 import com.callrq.models.Reminder;
 import com.callrq.utils.RequestCodes;
+import com.facebook.login.LoginManager;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 

@@ -4,6 +4,7 @@
     <string name="main_name">Home</string>
     <string name="reschedule_name">Reschedule a call</string>
     <string name="about_name">About CallerQ</string>
+    <string name="intro_advice">The app will automatically start sending notifications after calls</string>
     <string name="settings_name">Settings</string>
     <string name="server_client_id">1062679360456-bnusi1bhk76d930u6eelmut352u6dnk9.apps.googleusercontent.com</string>
     <string name="version_no">Version no. 1.0.29</string>
@@ -79,11 +80,12 @@
     <string name="initial_time_amount_summary">Specify the amount of time initially added to the reschedule form time field</string>
     <string name="authentication_failed" translatable="false">Authentication failed</string>
 
-
+    <string name="google_login_button_text">Sign in</string>
 
     <!-- Facebook application ID and custom URL scheme (app ID prefixed by 'fb'). -->
-    <string name="facebook_application_id" translatable="false">YOUR_APP_ID</string>
-    <string name="facebook_login_protocol_scheme" translatable="false">fbYOUR_APP_ID</string>
+    <string name="facebook_app_id">332576517250230</string>
+    <string name="fb_login_protocol_scheme">fb332576517250230</string>
+    <string name="fb_login_button_text">Sign in</string>
     <!-- Twitter consumer key and secret -->
     <string name="twitter_consumer_key" translatable="false">YOUR_CONSUMER_KEY</string>
     <string name="twitter_consumer_secret" translatable="false">YOUR_CONSUMER_SECRET</string>

@@ -2,6 +2,7 @@ package com.callrq;
 
 import android.app.Application;
 import android.content.Context;
+
 import com.callrq.injection.component.ApplicationComponent;
 import com.callrq.injection.component.DaggerApplicationComponent;
 import com.callrq.injection.module.ServiceModule;
@@ -24,7 +25,6 @@ public class CallerqApplication extends Application {
         APP = DaggerApplicationComponent.builder()
                 .serviceModule(new ServiceModule())
                 .build();
-
     }
 
     /**

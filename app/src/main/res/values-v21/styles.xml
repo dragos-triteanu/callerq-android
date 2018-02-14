@@ -37,4 +37,10 @@
         <item name="android:background">@color/colorBlack</item>
     </style>
 
+    <style name="LoginButton">
+        <item name="android:textSize">@dimen/small_text_size</item>
+        <item name="android:paddingTop">10sp</item>
+        <item name="android:paddingBottom">10sp</item>
+    </style>
+
 </resources>
