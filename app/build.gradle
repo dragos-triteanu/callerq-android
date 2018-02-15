@@ -2,16 +2,25 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
 android {
+    signingConfigs {
+        release {
+            keyAlias 'key0'
+            keyPassword 'C@ll3rQ'
+            storeFile file('C:/Users/drago/.android/callerq.jks')
+            storePassword 'C@ll3rQ'
+        }
+    }
+    lintOptions {
+        abortOnError false
+    }
     compileSdkVersion 26
     buildToolsVersion '26.0.2'
-
     compileOptions.incremental = false
     useLibrary 'org.apache.http.legacy'
-
     defaultConfig {
         applicationId 'com.callrq'
         minSdkVersion 19
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -19,14 +28,16 @@ android {
     }
     buildTypes {
         release {
+            debuggable false
+            jniDebuggable false
+            signingConfig signingConfigs.release
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-    }
-    lintOptions {
-        abortOnError false
-    }
-    productFlavors {
+        debug {
+            debuggable true
+            renderscriptDebuggable true
+            minifyEnabled false
+        }
     }
 }
 
@@ -35,40 +46,33 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-
     compile 'com.facebook.android:facebook-android-sdk:4.26.0'
     //Support
     compile 'com.android.support:appcompat-v7:26.1.0'
     compile 'com.android.support:design:26.1.0'
     compile 'com.android.support:support-v4:26.1.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
-
     //Firebase + auth
     compile 'com.google.firebase:firebase-core:11.8.0'
     implementation 'com.google.firebase:firebase-auth:11.8.0'
     implementation 'com.google.firebase:firebase-crash:11.8.0'
-
     //Play Services
     compile 'com.google.android.gms:play-services-auth:11.8.0'
     compile 'com.google.android.gms:play-services-analytics:11.8.0'
-
     //Crashlythics
     compile('com.crashlytics.sdk.android:crashlytics:2.9.0@aar') {
         transitive = true
     }
-
     //DI
     compile 'com.google.dagger:dagger:2.11'
     compile 'com.jakewharton:butterknife:8.6.0'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.11'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
-
     // Misc
     compile 'com.github.bumptech.glide:glide:4.0.0-RC1'
     compile 'com.weiwangcn.betterspinner:library:1.1.0'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC1'
-
 }
 
 
