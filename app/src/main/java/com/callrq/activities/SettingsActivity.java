@@ -1,5 +1,6 @@
 package com.callrq.activities;
 
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -44,6 +45,7 @@ public class SettingsActivity extends AppCompatActivity implements ListView.OnIt
     }
 
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onFragmentComplete() {
         assert settingsFragment.getView() != null;

@@ -17,12 +17,13 @@
         android:layout_marginTop="150dp"/>
 
     <TextView
+        android:id="@+id/introAdvice"
         android:layout_width="291dp"
         android:layout_height="84dp"
         android:layout_marginBottom="88dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="@string/intro_advice"
+        android:text="@string/intro_advice_notif_on"
         android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

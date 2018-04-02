@@ -1,13 +1,15 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <string name="app_name">CallerQ</string>
+    <string name="welcome_to">Welcome to</string>
     <string name="main_name">Home</string>
     <string name="reschedule_name">Reschedule a call</string>
     <string name="about_name">About CallerQ</string>
-    <string name="intro_advice">The app will automatically start sending notifications after calls</string>
+    <string name="intro_advice_notif_on">The app will automatically start sending notifications after calls.</string>
+    <string name="intro_advice_notif_off">You have disabled notifications. The app will start working as soon as you enable them in the settings.</string>
     <string name="settings_name">Settings</string>
     <string name="server_client_id">1062679360456-bnusi1bhk76d930u6eelmut352u6dnk9.apps.googleusercontent.com</string>
-    <string name="version_no">Version no. 1.0.29</string>
+    <string name="version_no">Version no. 1.0.36</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="double_press_close">Press the back button again to exit</string>
@@ -77,18 +79,14 @@
     <string name="snooze_duration_dialog_title">Snooze duration in minutes</string>
     <string name="initial_time_amount_dialog_title">Initial time amount in minutes</string>
     <string name="initial_time_amount_title">Initial time amount</string>
-    <string name="initial_time_amount_summary">Specify the amount of time initially added to the reschedule form time field</string>
+    <string name="initial_time_amount_summary">Specify the default amount of time initially added to a new reminder</string>
     <string name="authentication_failed" translatable="false">Authentication failed</string>
-
-    <string name="google_login_button_text">Sign in</string>
 
     <!-- Facebook application ID and custom URL scheme (app ID prefixed by 'fb'). -->
     <string name="facebook_app_id">332576517250230</string>
     <string name="fb_login_protocol_scheme">fb332576517250230</string>
-    <string name="fb_login_button_text">Sign in</string>
     <!-- Twitter consumer key and secret -->
     <string name="twitter_consumer_key" translatable="false">YOUR_CONSUMER_KEY</string>
     <string name="twitter_consumer_secret" translatable="false">YOUR_CONSUMER_SECRET</string>
-
 
 </resources>

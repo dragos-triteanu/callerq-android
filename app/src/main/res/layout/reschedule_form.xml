@@ -98,7 +98,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="36dp">
 
-        <com.weiwangcn.betterspinner.library.BetterSpinner
+        <com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner
             android:id="@+id/dateInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -114,7 +114,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp">
 
-        <com.weiwangcn.betterspinner.library.BetterSpinner
+        <com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner
             android:id="@+id/timeInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

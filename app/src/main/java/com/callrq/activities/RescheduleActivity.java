@@ -39,7 +39,7 @@ import com.callrq.services.ScheduleService;
 import com.callrq.utils.CallConstants;
 import com.callrq.utils.RequestCodes;
 import com.google.android.gms.auth.GoogleAuthUtil;
-import com.weiwangcn.betterspinner.library.BetterSpinner;
+import com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -81,10 +81,10 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
     ImageButton buttonClose;
 
     @BindView(R.id.dateInput)
-    BetterSpinner dateInput;
+    MaterialBetterSpinner dateInput;
 
     @BindView(R.id.timeInput)
-    BetterSpinner timeInput;
+    MaterialBetterSpinner timeInput;
 
     @BindView(R.id.quickContactBadge)
     QuickContactBadge quickContactBadge;
@@ -119,7 +119,7 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reschedule);
         setFinishOnTouchOutside(false);
-        mContainerView = (ViewGroup) findViewById(R.id.reschedule_container);
+        mContainerView = findViewById(R.id.reschedule_container);
 
         formView = (ViewGroup) LayoutInflater.from(this).inflate(
                 R.layout.reschedule_form, mContainerView, false);
@@ -203,6 +203,7 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         editor.putString(phoneNumber + contact.name, reminder.getMemoText()).apply();
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        assert notificationManager != null;
         notificationManager.cancel(ScheduleService.NOTIFICATION_ID);
 
         ViewGroup savedView = (ViewGroup) LayoutInflater.from(RescheduleActivity.this).inflate(
@@ -375,6 +376,7 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
 
         // Get the AlarmManager service
         AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+        assert am != null;
         am.set(AlarmManager.RTC_WAKEUP, reminder.getScheduleDatetime(), sender);
     }
 

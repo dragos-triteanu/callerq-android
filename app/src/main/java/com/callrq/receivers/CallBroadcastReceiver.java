@@ -40,6 +40,9 @@ public class CallBroadcastReceiver extends BroadcastReceiver implements AddressB
 
         String intentAction = intent.getAction();
 
+        assert intentAction != null;
+        assert intent.getExtras() != null;
+
         if (intentAction.equals(CallConstants.OUTGOING_CALL_ACTION)) {
             phoneNumber = intent.getExtras().getString(CallConstants.INTENT_PHONE_NUMBER);
 

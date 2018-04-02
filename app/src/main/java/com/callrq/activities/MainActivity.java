@@ -3,9 +3,7 @@ package com.callrq.activities;
 import android.Manifest;
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.ActivityNotFoundException;
-import android.content.Context;
-import android.content.Intent;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -27,10 +25,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.*;
 import android.widget.*;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.callrq.R;
@@ -39,19 +35,13 @@ import com.callrq.fragments.RemindersFragment;
 import com.callrq.helpers.DatabaseHelper;
 import com.callrq.models.Reminder;
 import com.callrq.utils.RequestCodes;
-import com.facebook.login.LoginManager;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Locale;
+import java.util.*;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener, DatabaseHelper.DatabaseListener {
 
@@ -76,11 +66,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     NavigationView navigationView;
 
     private Intent callIntent;
-    private Boolean doubleBackToExitPressedOnce = false;
+    private boolean doubleBackToExitPressedOnce = false;
 
+    private Fragment homeFragment;
     private Fragment remindersFragment;
-
-    private FirebaseAuth mFirebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        mFirebaseAuth = FirebaseAuth.getInstance();
+        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
 
         account = mFirebaseAuth.getCurrentUser();
 
@@ -138,12 +127,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         MenuItem homeItem = navMenu.findItem(R.id.nav_home);
         MenuItem remindersItem = navMenu.findItem(R.id.nav_reminders);
 
+        homeFragment = new HomeFragment();
         remindersFragment = new RemindersFragment();
 
         if (getIntent().getBooleanExtra("displayReminders", false)) {
             setFragment(remindersFragment, remindersItem);
         } else {
-            setFragment(new HomeFragment(), homeItem);
+            setFragment(homeFragment, homeItem);
         }
     }
 
@@ -155,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
         switch (id) {
             case R.id.nav_home:
-                setFragment(new HomeFragment(), item);
+                setFragment(homeFragment, item);
                 break;
             case R.id.nav_reminders:
                 setFragment(remindersFragment, item);
@@ -172,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -191,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         MenuItem remindersItem = navMenu.findItem(R.id.nav_reminders);
 
         if (displayReminders) {
-            setFragment(new RemindersFragment(), remindersItem);
+            setFragment(remindersFragment, remindersItem);
         }
     }
 
@@ -246,14 +236,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     final Uri phoneNumberUri = data.getData();
                     getSupportLoaderManager().initLoader(0, null, new LoaderManager.LoaderCallbacks<Cursor>() {
 
+                        @NonNull
                         @Override
                         public Loader<Cursor> onCreateLoader(int loaderId, Bundle extras) {
+                            assert phoneNumberUri != null;
                             return new CursorLoader(MainActivity.this, phoneNumberUri, null, null,
                                     null, null);
                         }
 
                         @Override
-                        public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+                        public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
                             if (cursor.moveToFirst()) {
                                 String phoneNumber = cursor.getString(cursor
                                         .getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
@@ -274,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
 
                         @Override
-                        public void onLoaderReset(Loader<Cursor> loader) {
+                        public void onLoaderReset(@NonNull Loader<Cursor> loader) {
                         }
                     });
 
@@ -286,7 +278,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -357,9 +349,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             assert reminder != null;
             if (reminder.isMeeting()) {
-                reminderTitle.setText(getString(R.string.calendar_event_title_meeting) + " " + reminder.getContactName());
+                String meetingTitle = getString(R.string.calendar_event_title_meeting) + " " + reminder.getContactName();
+                reminderTitle.setText(meetingTitle);
             } else {
-                reminderTitle.setText(getString(R.string.calendar_event_title_call) + " " + reminder.getContactName());
+                String callTitle = getString(R.string.calendar_event_title_call) + " " + reminder.getContactName();
+                reminderTitle.setText(callTitle);
             }
 
             SimpleDateFormat simpleDateFormat;

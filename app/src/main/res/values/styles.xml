@@ -14,7 +14,7 @@
     </style>
 
     <style name="AppTheme.Dialog" parent="Theme.AppCompat.Light.Dialog">
-        <item name="colorAccent">@color/materialColor</item>
+        <item name="colorAccent">@color/colorAccent</item>
         <item name="windowNoTitle">true</item>
     </style>
 

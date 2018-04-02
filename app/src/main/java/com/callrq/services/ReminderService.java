@@ -11,7 +11,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat;
 import com.callrq.R;
 import com.callrq.models.Reminder;
 import com.callrq.utils.CallConstants;

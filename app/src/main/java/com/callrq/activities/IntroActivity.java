@@ -26,12 +26,12 @@ import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.shobhitpuri.custombuttons.GoogleSignInButton;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -49,7 +49,10 @@ import com.google.firebase.crash.FirebaseCrash;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import java.util.Objects;
+
 public class IntroActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
+
     private static final String TAG = "IntroActivity";
     private static final int RC_SIGN_IN = 9001;
 
@@ -57,7 +60,7 @@ public class IntroActivity extends AppCompatActivity implements GoogleApiClient.
     View mContentView;
 
     @BindView(R.id.googleSignInButton)
-    SignInButton mGoogleSignInButton;
+    GoogleSignInButton mGoogleSignInButton;
 
     @BindView(R.id.facebookSignInButton)
     LoginButton mFacebookSignInButton;
@@ -68,12 +71,10 @@ public class IntroActivity extends AppCompatActivity implements GoogleApiClient.
     @BindView(R.id.loadingIndicator)
     View loadingIndicator;
 
-
     private FirebaseAuth mFirebaseAuth;
     private GoogleSignInClient mGoogleSignInClient;
     private CallbackManager mCallbackManager;
     private Boolean isLoading = false;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +117,7 @@ public class IntroActivity extends AppCompatActivity implements GoogleApiClient.
 
     @Override
     public void onBackPressed() {
-        if (isLoading) {
+        if (!isLoading) {
             super.onBackPressed();
         }
     }
@@ -157,7 +158,6 @@ public class IntroActivity extends AppCompatActivity implements GoogleApiClient.
                 Log.d(TAG, "facebook:onCancel");
                 loadingIndicator.setVisibility(View.INVISIBLE);
                 showAuthButtons();
-
             }
 
             @Override
@@ -209,7 +209,7 @@ public class IntroActivity extends AppCompatActivity implements GoogleApiClient.
                             handleSignInResult(user);
                         } else {
                             try {
-                                throw task.getException();
+                                throw Objects.requireNonNull(task.getException());
                             } catch (FirebaseAuthUserCollisionException e) {
                                 if (e.getErrorCode().equals("ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL")) {
                                     FirebaseCrash.logcat(Log.ERROR, TAG, "Facebook account collision");
@@ -278,13 +278,13 @@ public class IntroActivity extends AppCompatActivity implements GoogleApiClient.
         switch (requestCode) {
             case RequestCodes.MY_PERMISSIONS_REQUEST_MAKE_PHONE_CALL:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    onProceed(mFirebaseAuth.getCurrentUser());
+                    onProceed(Objects.requireNonNull(mFirebaseAuth.getCurrentUser()));
                 } else {
                     finish();
                 }
                 break;
             default:
-                onProceed(mFirebaseAuth.getCurrentUser());
+                onProceed(Objects.requireNonNull(mFirebaseAuth.getCurrentUser()));
                 break;
         }
     }
