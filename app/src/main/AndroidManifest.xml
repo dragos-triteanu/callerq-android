@@ -70,16 +70,6 @@
             android:theme="@style/AppTheme.Dialog">
         </activity>
 
-        <receiver
-            android:name="com.callrq.receivers.CallBroadcastReceiver" android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.PHONE_STATE"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.NEW_OUTGOING_CALL"/>
-            </intent-filter>
-        </receiver>
-
         <service
             android:name="com.callrq.services.NotificationActionService"
             android:exported="false"/>

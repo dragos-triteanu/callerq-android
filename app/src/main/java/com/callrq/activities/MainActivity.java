@@ -34,6 +34,8 @@ import com.callrq.fragments.HomeFragment;
 import com.callrq.fragments.RemindersFragment;
 import com.callrq.helpers.DatabaseHelper;
 import com.callrq.models.Reminder;
+import com.callrq.receivers.CallBroadcastReceiver;
+import com.callrq.utils.CallConstants;
 import com.callrq.utils.RequestCodes;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -66,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     NavigationView navigationView;
 
     private Intent callIntent;
+    private CallBroadcastReceiver callBroadcastReceiver;
     private boolean doubleBackToExitPressedOnce = false;
 
     private Fragment homeFragment;
@@ -135,6 +138,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             setFragment(homeFragment, homeItem);
         }
+
+        callBroadcastReceiver = new CallBroadcastReceiver();
+
+        IntentFilter receiverFilters = new IntentFilter();
+        receiverFilters.addAction(CallConstants.PHONE_STATE_ACTION);
+        receiverFilters.addAction(CallConstants.OUTGOING_CALL_ACTION);
+
+        registerReceiver(callBroadcastReceiver, receiverFilters);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -157,6 +168,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(new Intent(this, SettingsActivity.class));
                 break;
             case R.id.nav_logout:
+                unregisterReceiver(callBroadcastReceiver);
                 startActivity(new Intent(MainActivity.this, IntroActivity.class).putExtra("requestLogout", true));
                 finish();
                 break;
