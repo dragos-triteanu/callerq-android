@@ -11,6 +11,7 @@ import android.widget.Toast;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class TimePickerPreference extends DialogPreference {
 
@@ -32,7 +33,7 @@ public class TimePickerPreference extends DialogPreference {
         setPositiveButtonText("Set time");
         setNegativeButtonText("Cancel");
         calendar = Calendar.getInstance();
-        defaultCalendar = Calendar.getInstance();
+        defaultCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
     }
 
     @Override
@@ -69,7 +70,7 @@ public class TimePickerPreference extends DialogPreference {
 
         if (positiveResult) {
 
-            Calendar validateCalendar = Calendar.getInstance();
+            Calendar validateCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             validateCalendar.set(Calendar.HOUR_OF_DAY, picker.getCurrentHour());
             validateCalendar.set(Calendar.MINUTE, picker.getCurrentMinute());
 

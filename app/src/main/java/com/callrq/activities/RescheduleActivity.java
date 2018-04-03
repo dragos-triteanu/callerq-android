@@ -12,7 +12,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.provider.CalendarContract;
+import android.provider.CalendarContract.Events;
+import android.provider.CalendarContract.Calendars;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -244,6 +245,7 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
 
     public void onClose(View view) {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        assert notificationManager != null;
         notificationManager.cancel(ScheduleService.NOTIFICATION_ID);
 
         ViewGroup canceledView = (ViewGroup) LayoutInflater.from(RescheduleActivity.this).inflate(
@@ -414,15 +416,15 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
 
         ContentResolver cr = getContentResolver();
         ContentValues values = new ContentValues();
-        values.put(CalendarContract.Events.DTSTART, startMillis);
-        values.put(CalendarContract.Events.DTEND, endMillis);
-        values.put(CalendarContract.Events.TITLE, eventTitle);
-        values.put(CalendarContract.Events.DESCRIPTION, reminder.getMemoText());
-        values.put(CalendarContract.Events.CALENDAR_ID, calendarId);
-        values.put(CalendarContract.Events.HAS_ALARM, false);
-        values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().getID());
+        values.put(Events.DTSTART, startMillis);
+        values.put(Events.DTEND, endMillis);
+        values.put(Events.TITLE, eventTitle);
+        values.put(Events.DESCRIPTION, reminder.getMemoText());
+        values.put(Events.CALENDAR_ID, calendarId);
+        values.put(Events.HAS_ALARM, 0);
+        values.put(Events.EVENT_TIMEZONE, TimeZone.getDefault().getID());
 
-        eventUri = cr.insert(CalendarContract.Events.CONTENT_URI, values);
+        eventUri = cr.insert(Events.CONTENT_URI, values);
     }
 
     private Account getFirstGoogleAccount() {
@@ -442,9 +444,9 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
         // try to find the main calendar
         Cursor cur;
         ContentResolver cr = getContentResolver();
-        Uri uri = CalendarContract.Calendars.CONTENT_URI;
-        String selection = "((" + CalendarContract.Calendars.ACCOUNT_NAME + " = ?) AND (" + CalendarContract.Calendars.ACCOUNT_TYPE
-                + " = ?) AND (" + CalendarContract.Calendars.OWNER_ACCOUNT + " = ?))";
+        Uri uri = Calendars.CONTENT_URI;
+        String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND (" + Calendars.ACCOUNT_TYPE
+                + " = ?) AND (" + Calendars.OWNER_ACCOUNT + " = ?))";
         String[] selectionArgs = new String[]{account.name, account.type, account.name};
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
@@ -453,14 +455,14 @@ public class RescheduleActivity extends AppCompatActivity implements DatePickerD
                     RequestCodes.MY_PERMISSIONS_REQUEST_WRITE_CALENDAR);
             return null;
         } else {
-            cur = cr.query(uri, new String[]{CalendarContract.Calendars._ID}, selection, selectionArgs, null);
+            cur = cr.query(uri, new String[]{Calendars._ID}, selection, selectionArgs, null);
 
             assert cur != null;
             if (!cur.moveToFirst()) {
                 return null;
             }
 
-            long calendarId = cur.getLong(cur.getColumnIndex(CalendarContract.Calendars._ID));
+            long calendarId = cur.getLong(cur.getColumnIndex(Calendars._ID));
             cur.close();
 
             return calendarId;
