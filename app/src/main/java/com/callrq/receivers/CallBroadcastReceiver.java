@@ -3,13 +3,10 @@ package com.callrq.receivers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-
 import com.callrq.helpers.AddressBookHelper;
 import com.callrq.helpers.PreferencesHelper;
 import com.callrq.models.CallDetails;
@@ -88,22 +85,17 @@ public class CallBroadcastReceiver extends BroadcastReceiver implements AddressB
             }
             getContactRequestId = "";
 
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-            final boolean isApplicationOn = prefs.getBoolean("pref_application_status", true);
-
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if (isApplicationOn) {
-                        Intent scheduleIntent = new Intent(context, ScheduleService.class).setAction("scheduleNotification");
+                    Intent scheduleIntent = new Intent(context, ScheduleService.class).setAction("scheduleNotification");
 
-                        Bundle bundle = new Bundle();
-                        bundle.putSerializable(CallConstants.CALL_DETAILS_EXTRA, new CallDetails(contactName, phoneNumber, callStartedTime, callStopTime));
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable(CallConstants.CALL_DETAILS_EXTRA, new CallDetails(contactName, phoneNumber, callStartedTime, callStopTime));
 
-                        scheduleIntent.putExtra("callDetailsBundle", bundle);
+                    scheduleIntent.putExtra("callDetailsBundle", bundle);
 
-                        context.startService(scheduleIntent);
-                    }
+                    context.startService(scheduleIntent);
                 }
             }, 500);
         }

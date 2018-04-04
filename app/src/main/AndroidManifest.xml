@@ -71,6 +71,10 @@
         </activity>
 
         <service
+            android:name="com.callrq.services.CallReceiverService"
+            android:exported="false">
+        </service>
+        <service
             android:name="com.callrq.services.NotificationActionService"
             android:exported="false"/>
         <service

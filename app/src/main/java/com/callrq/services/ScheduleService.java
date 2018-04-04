@@ -11,7 +11,6 @@ import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.telephony.PhoneNumberUtils;
 import com.callrq.R;
 import com.callrq.activities.RescheduleActivity;
@@ -21,7 +20,7 @@ import com.callrq.utils.CallConstants;
 public class ScheduleService extends IntentService {
 
     private static final String TAG = "ScheduleService: ";
-    public static final int NOTIFICATION_ID = 1;
+    public static final int NOTIFICATION_ID = 2;
 
     public ScheduleService() {
         super(ScheduleService.class.getSimpleName());
@@ -40,6 +39,7 @@ public class ScheduleService extends IntentService {
         Bundle bundle = intent.getBundleExtra("callDetailsBundle");
         CallDetails callDetails = (CallDetails) bundle.getSerializable(CallConstants.CALL_DETAILS_EXTRA);
 
+        assert action != null;
         if (action.equals("scheduleNotification")) {
             sendNotificationAfterCall(this, callDetails);
         }
@@ -60,7 +60,7 @@ public class ScheduleService extends IntentService {
         PendingIntent reschedulePendingIntent = PendingIntent.getActivity(context, 0, rescheduleActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent cancelPendingIntent = PendingIntent.getService(context, 0, snoozeIntent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_CANCEL_CURRENT);
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
+        Notification.Builder notificationBuilder = new Notification.Builder(this);
 
         String contentText = "Schedule a call for " + (callDetails.getContactName().isEmpty() ? PhoneNumberUtils.formatNumber(callDetails.getPhoneNumber()) : callDetails.getContactName());
 
@@ -79,12 +79,15 @@ public class ScheduleService extends IntentService {
         }
         if (prefs.getBoolean("pref_alert_vibrate", true)) {
             notificationBuilder.setVibrate(new long[]{1000, 1000});
+        } else {
+            notificationBuilder.setVibrate(null);
         }
 
         notificationBuilder.addAction(0, "Snooze", cancelPendingIntent);
         notificationBuilder.addAction(0, "Schedule", reschedulePendingIntent);
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        assert notificationManager != null;
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 }

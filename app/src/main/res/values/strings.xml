@@ -61,7 +61,7 @@
     <string name="afternoon_time_title">Afternoon time</string>
     <string name="evening_time_title">Evening time</string>
 
-    <string name="notifications_alerts_title">Notifications alerts</string>
+    <string name="notifications_alerts_title">Notification alerts</string>
 
     <string name="alert_sound_title">Alert sound</string>
     <string name="alert_vibrate_title">Vibrate</string>
@@ -88,5 +88,6 @@
     <!-- Twitter consumer key and secret -->
     <string name="twitter_consumer_key" translatable="false">YOUR_CONSUMER_KEY</string>
     <string name="twitter_consumer_secret" translatable="false">YOUR_CONSUMER_SECRET</string>
+    <string name="title_confirmation_dialog">Disable notifications</string>
 
 </resources>

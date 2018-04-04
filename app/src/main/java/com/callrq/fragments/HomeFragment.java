@@ -42,10 +42,10 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean notificationsOn = prefs.getBoolean("pref_application_status", true);
+        boolean applicationEnabled = prefs.getBoolean("pref_application_status", true);
 
         TextView introAdvice = view.findViewById(R.id.introAdvice);
-        if (notificationsOn) {
+        if (applicationEnabled) {
             introAdvice.setText(R.string.intro_advice_notif_on);
         } else {
             introAdvice.setText(R.string.intro_advice_notif_off);

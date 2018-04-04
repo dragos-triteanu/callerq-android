@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -34,8 +35,7 @@ import com.callrq.fragments.HomeFragment;
 import com.callrq.fragments.RemindersFragment;
 import com.callrq.helpers.DatabaseHelper;
 import com.callrq.models.Reminder;
-import com.callrq.receivers.CallBroadcastReceiver;
-import com.callrq.utils.CallConstants;
+import com.callrq.services.CallReceiverService;
 import com.callrq.utils.RequestCodes;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     NavigationView navigationView;
 
     private Intent callIntent;
-    private CallBroadcastReceiver callBroadcastReceiver;
+    private Intent callReceiverService;
     private boolean doubleBackToExitPressedOnce = false;
 
     private Fragment homeFragment;
@@ -139,13 +139,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             setFragment(homeFragment, homeItem);
         }
 
-        callBroadcastReceiver = new CallBroadcastReceiver();
-
-        IntentFilter receiverFilters = new IntentFilter();
-        receiverFilters.addAction(CallConstants.PHONE_STATE_ACTION);
-        receiverFilters.addAction(CallConstants.OUTGOING_CALL_ACTION);
-
-        registerReceiver(callBroadcastReceiver, receiverFilters);
+        callReceiverService = new Intent(this, CallReceiverService.class);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -168,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(new Intent(this, SettingsActivity.class));
                 break;
             case R.id.nav_logout:
-                unregisterReceiver(callBroadcastReceiver);
+                stopService(callReceiverService);
                 startActivity(new Intent(MainActivity.this, IntroActivity.class).putExtra("requestLogout", true));
                 finish();
                 break;
@@ -194,6 +188,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (displayReminders) {
             setFragment(remindersFragment, remindersItem);
+        }
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean applicationEnabled = prefs.getBoolean("pref_application_status", true);
+        if (applicationEnabled) {
+            startService(callReceiverService);
+        } else {
+            stopService(callReceiverService);
         }
     }
 

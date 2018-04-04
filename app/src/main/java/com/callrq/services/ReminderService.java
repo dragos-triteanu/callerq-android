@@ -11,7 +11,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
 import com.callrq.R;
 import com.callrq.models.Reminder;
 import com.callrq.utils.CallConstants;
@@ -22,7 +21,7 @@ public class ReminderService extends IntentService {
 
     private static final String TAG = "ReminderService: ";
     public static final String REMINDER = "reminderDetails";
-    public static final int NOTIFICATION_ID = 2;
+    public static final int NOTIFICATION_ID = 3;
 
     public ReminderService() {
         super("ReminderService");
@@ -36,6 +35,7 @@ public class ReminderService extends IntentService {
         Bundle extras = intent.getBundleExtra("reminderBundle");
         Reminder reminder = extras.getParcelable(REMINDER);
         Uri eventUri = intent.getParcelableExtra("eventUri");
+        assert action != null;
         if (action.equals("reminderNotification")) {
             showReminderNotification(this, reminder);
             if (eventUri != null) {
@@ -55,7 +55,7 @@ public class ReminderService extends IntentService {
         snoozeIntent.putExtra(REMINDER, reminder);
         snoozeIntent.putExtra(CallConstants.NOTIFICATION_ID, NOTIFICATION_ID);
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
+        Notification.Builder notificationBuilder = new Notification.Builder(context);
 
         notificationBuilder.setAutoCancel(false)
                 .setWhen(System.currentTimeMillis())
@@ -84,10 +84,11 @@ public class ReminderService extends IntentService {
         PendingIntent callPendingIntent = PendingIntent.getService(context, 0, callIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         PendingIntent cancelPendingIntent = PendingIntent.getService(context, 0, snoozeIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        notificationBuilder.addAction(new NotificationCompat.Action(0, "Snooze", cancelPendingIntent));
-        notificationBuilder.addAction(new NotificationCompat.Action(0, "Call now", callPendingIntent));
+        notificationBuilder.addAction(0, "Snooze", cancelPendingIntent);
+        notificationBuilder.addAction(0, "Schedule", callPendingIntent);
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        assert notificationManager != null;
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 }
