@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.IBinder;
 import com.callrq.R;
+import com.callrq.activities.IntroActivity;
 import com.callrq.activities.MainActivity;
 import com.callrq.receivers.CallBroadcastReceiver;
 import com.callrq.utils.CallConstants;
@@ -50,7 +51,7 @@ public class CallReceiverService extends Service {
     private void showReceiverRunningNotification() {
         // Create intent that will bring our app to the front, as if it was tapped in the app
         // launcher
-        Intent showTaskIntent = new Intent(getApplicationContext(), MainActivity.class);
+        Intent showTaskIntent = new Intent(getApplicationContext(), IntroActivity.class);
         showTaskIntent.setAction(Intent.ACTION_MAIN);
         showTaskIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         showTaskIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

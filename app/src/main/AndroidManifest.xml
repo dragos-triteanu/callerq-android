@@ -18,7 +18,7 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
-        android:name="com.callrq.CallerqApplication"
+        android:name=".CallerqApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_logo"
         android:label="@string/app_name"
@@ -31,36 +31,35 @@
             android:value="@string/facebook_app_id"/>
 
         <activity
-            android:name="com.callrq.activities.IntroActivity"
+            android:name=".activities.IntroActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait"
             android:theme="@style/FullscreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
-            android:name="com.callrq.activities.MainActivity"
+            android:name=".activities.MainActivity"
             android:label="@string/main_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name="com.callrq.activities.AboutActivity"
+            android:name=".activities.AboutActivity"
             android:label="@string/about_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name="com.callrq.activities.SettingsActivity"
+            android:name=".activities.SettingsActivity"
             android:label="@string/settings_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name="com.callrq.activities.RescheduleActivity"
+            android:name=".activities.RescheduleActivity"
             android:allowTaskReparenting="true"
             android:excludeFromRecents="true"
             android:label="@string/reschedule_name"
@@ -70,23 +69,31 @@
             android:theme="@style/AppTheme.Dialog">
         </activity>
 
+        <receiver android:name=".receivers.BootCompletedReceiver" android:enabled="true" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>
+
         <service
-            android:name="com.callrq.services.CallReceiverService"
+            android:name=".services.CallReceiverService"
             android:exported="false">
         </service>
         <service
-            android:name="com.callrq.services.NotificationActionService"
+            android:name=".services.NotificationActionService"
             android:exported="false"/>
         <service
-            android:name="com.callrq.services.DatabaseService"
+            android:name=".services.DatabaseService"
             android:exported="false">
         </service>
         <service
-            android:name="com.callrq.services.ReminderService"
+            android:name=".services.ReminderService"
             android:exported="false">
         </service>
         <service
-            android:name="com.callrq.services.ScheduleService"
+            android:name=".services.ScheduleService"
             android:exported="false">
         </service>
     </application>
