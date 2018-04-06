@@ -88,13 +88,13 @@ public class IntroActivity extends AppCompatActivity implements GoogleApiClient.
         authContainer.setVisibility(View.INVISIBLE);
         loadingIndicator.setVisibility(View.INVISIBLE);
 
+        initGoogleFirebaseAuth();
+        initFacebookFirebaseAuth();
+
         boolean logoutRequested = logout.getBooleanExtra("requestLogout", false);
         if (logoutRequested) {
             onLogout();
         }
-
-        initGoogleFirebaseAuth();
-        initFacebookFirebaseAuth();
     }
 
 
