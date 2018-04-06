@@ -22,7 +22,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 25
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.42"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -38,6 +38,10 @@ android {
             renderscriptDebuggable true
             minifyEnabled false
         }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
@@ -73,7 +77,7 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     // Misc
     implementation 'com.github.bumptech.glide:glide:4.6.1'
-    implementation ('com.weiwangcn.betterspinner:library-material:1.1.0') {
+    implementation('com.weiwangcn.betterspinner:library-material:1.1.0') {
         exclude group: 'com.android.support', module: 'appcompat-v7'
     }
     implementation 'com.shobhitpuri.custombuttons:google-signin:1.0.0'
