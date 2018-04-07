@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+
 apply plugin: 'io.fabric'
 
 android {
@@ -6,7 +7,7 @@ android {
         release {
             keyAlias 'key0'
             keyPassword 'C@ll3rQ'
-            storeFile file('C:/Users/drago/.android/callerq.jks')
+            storeFile file('~/.android/callerq.jks')
             storePassword 'C@ll3rQ'
         }
     }
@@ -39,10 +40,10 @@ android {
             minifyEnabled false
         }
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
+}
+
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
 }
 
 dependencies {
@@ -52,12 +53,12 @@ dependencies {
     })
     implementation 'com.facebook.android:facebook-android-sdk:4.31.0'
     //Support
-    implementation 'com.android.support:appcompat-v7:27.1.0'
-    implementation 'com.android.support:animated-vector-drawable:27.1.0'
-    implementation 'com.android.support:cardview-v7:27.1.0'
-    implementation 'com.android.support:customtabs:27.1.0'
-    implementation 'com.android.support:design:27.1.0'
-    implementation 'com.android.support:support-v4:27.1.0'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:animated-vector-drawable:27.1.1'
+    implementation 'com.android.support:cardview-v7:27.1.1'
+    implementation 'com.android.support:customtabs:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.android.support:support-v4:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     //Firebase + auth
     implementation 'com.google.firebase:firebase-core:12.0.1'

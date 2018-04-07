@@ -9,7 +9,7 @@
     <string name="intro_advice_notif_off">You have disabled notifications. The app will start working as soon as you enable them in the settings.</string>
     <string name="settings_name">Settings</string>
     <string name="server_client_id">1062679360456-bnusi1bhk76d930u6eelmut352u6dnk9.apps.googleusercontent.com</string>
-    <string name="version_no">Version no. 1.0.42</string>
+    <string name="version_no">Version no. 1.0.43</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="double_press_close">Press the back button again to exit</string>
@@ -89,5 +89,7 @@
     <string name="twitter_consumer_key" translatable="false">YOUR_CONSUMER_KEY</string>
     <string name="twitter_consumer_secret" translatable="false">YOUR_CONSUMER_SECRET</string>
     <string name="title_confirmation_dialog">Disable notifications</string>
+    <!-- Fabric api key -->
+    <string name="fabric_api_key">dc19dc91d8135a9a4343879ff67997d7fc24815f</string>
 
 </resources>

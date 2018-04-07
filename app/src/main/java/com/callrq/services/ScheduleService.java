@@ -58,7 +58,7 @@ public class ScheduleService extends IntentService {
         snoozeIntent.putExtra(CallConstants.NOTIFICATION_ID, NOTIFICATION_ID);
 
         PendingIntent reschedulePendingIntent = PendingIntent.getActivity(context, 0, rescheduleActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent cancelPendingIntent = PendingIntent.getService(context, 0, snoozeIntent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent snoozePendingIntent = PendingIntent.getService(context, 0, snoozeIntent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_CANCEL_CURRENT);
 
         Notification.Builder notificationBuilder = new Notification.Builder(this);
 
@@ -69,9 +69,10 @@ public class ScheduleService extends IntentService {
                 .setSmallIcon(R.mipmap.ic_logo)
                 .setContentTitle("Add a reminder")
                 .setContentText(contentText)
-                .setDefaults(Notification.DEFAULT_LIGHTS | Notification.FLAG_AUTO_CANCEL | Notification.FLAG_ONGOING_EVENT)
                 .setContentIntent(reschedulePendingIntent)
-                .setContentInfo("Info");
+                .setContentInfo("Info")
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setDefaults(Notification.DEFAULT_LIGHTS | Notification.FLAG_AUTO_CANCEL | Notification.FLAG_ONGOING_EVENT);
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         if (prefs.getBoolean("pref_alert_sound", true)) {
@@ -83,7 +84,7 @@ public class ScheduleService extends IntentService {
             notificationBuilder.setVibrate(null);
         }
 
-        notificationBuilder.addAction(0, "Snooze", cancelPendingIntent);
+        notificationBuilder.addAction(0, "Snooze", snoozePendingIntent);
         notificationBuilder.addAction(0, "Schedule", reschedulePendingIntent);
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

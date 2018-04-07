@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.callrq.R;
 import com.callrq.helpers.PreferencesHelper;
 import com.callrq.utils.RequestCodes;
+import com.crashlytics.android.Crashlytics;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -48,6 +49,7 @@ import com.google.firebase.crash.FirebaseCrash;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.fabric.sdk.android.Fabric;
 
 import java.util.Objects;
 
@@ -81,6 +83,8 @@ public class IntroActivity extends AppCompatActivity implements GoogleApiClient.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro);
         ButterKnife.bind(this);
+
+        Fabric.with(this, new Crashlytics());
 
         Intent logout = getIntent();
 

@@ -30,6 +30,10 @@
         <meta-data android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id"/>
 
+        <meta-data
+                android:name="io.fabric.ApiKey"
+                android:value="dc19dc91d8135a9a4343879ff67997d7fc24815f"/>
+
         <activity
             android:name=".activities.IntroActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
