@@ -5,10 +5,10 @@ apply plugin: 'io.fabric'
 android {
     signingConfigs {
         release {
-            keyAlias 'key0'
-            keyPassword 'C@ll3rQ'
+            keyAlias 'callerq'
+            keyPassword 'L@mbda117'
             storeFile file('~/.android/callerq.jks')
-            storePassword 'C@ll3rQ'
+            storePassword 'L@mbda117'
         }
     }
     lintOptions {
