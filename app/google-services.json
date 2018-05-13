@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "634453826624-c3a4oj03bjd6s2kuuj6optkjnjp9drm3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.callrq",
+            "certificate_hash": "a71c43473baad8e87f785e26cf7080dcbc0c37d4"
+          }
+        },
+        {
           "client_id": "634453826624-d90uk78qqb72gasats06ia4mrpdcdju1.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
