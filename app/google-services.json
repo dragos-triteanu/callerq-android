@@ -15,43 +15,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "634453826624-c3a4oj03bjd6s2kuuj6optkjnjp9drm3.apps.googleusercontent.com",
+          "client_id": "634453826624-fv5ujll4uv1sk9i4qoc8knrlvm5nuoco.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.callrq",
-            "certificate_hash": "a71c43473baad8e87f785e26cf7080dcbc0c37d4"
-          }
-        },
-        {
-          "client_id": "634453826624-d90uk78qqb72gasats06ia4mrpdcdju1.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.callrq",
-            "certificate_hash": "e8a570448457dcb7179fd06c0bd896f49a53ce35"
-          }
-        },
-        {
-          "client_id": "634453826624-j45ok59n1i98dmu2krafgan1dg6v9m9h.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.callrq",
-            "certificate_hash": "b5c442e99e20eea34616ce9582e0b25dc22ee524"
-          }
-        },
-        {
-          "client_id": "634453826624-u255jegl9rmt88m33v24h42l8hae9c8j.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.callrq",
-            "certificate_hash": "1691f3552c5140dec11b0faaa5cf0ba13e2cfcf3"
-          }
-        },
-        {
-          "client_id": "634453826624-ds3c68beb8o5ntljhftebgcfblnucbne.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.callrq",
-            "certificate_hash": "373f6ac468f4b836def148a82ad3077a44342a4f"
+            "certificate_hash": "f9f5c2c283f7d84fb773bf53f96a534b237014aa"
           }
         },
         {
